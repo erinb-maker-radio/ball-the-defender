@@ -1,0 +1,98 @@
+{
+  "name": "ball-defender",
+  "version": "8.6.0",
+  "description": "Multi-mode physics ball game with Ice Mode, Ball Go Boom, and more!",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server -p 8080 --cors -c-1",
+    "dev": "npx http-server -p 8080 --cors -c-1",
+    "build": "echo 'Ball Defender - Static build ready for deployment'",
+    "test": "echo 'Tests: PWA, mobile responsiveness, mode compatibility'",
+    "deploy": "echo 'Deployment handled by GitHub Actions'",
+    "lighthouse": "npx lighthouse http://localhost:8080 --output html --output-path ./lighthouse-report.html",
+    "serve": "npx http-server -p 8080 --cors -c-1 -o"
+  },
+  "keywords": [
+    "game",
+    "physics",
+    "ball",
+    "mobile",
+    "pwa",
+    "progressive-web-app",
+    "responsive",
+    "touch-controls",
+    "canvas",
+    "javascript"
+  ],
+  "author": "Ball Defender Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/ball-defender-game.git"
+  },
+  "homepage": "https://yourusername.github.io/ball-defender-game",
+  "bugs": {
+    "url": "https://github.com/yourusername/ball-defender-game/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "lighthouse": "^11.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "iOS >= 12",
+    "Android >= 8"
+  ],
+  "pwa": {
+    "name": "Ball Defender",
+    "short_name": "Ball Defender", 
+    "start_url": "./index.html",
+    "display": "standalone",
+    "theme_color": "#667eea",
+    "background_color": "#1a1a2e"
+  },
+  "features": [
+    "PWA installable",
+    "Offline functionality", 
+    "Touch controls",
+    "Responsive design",
+    "Multiple game modes",
+    "Performance optimization",
+    "Auto-updates",
+    "Cross-platform"
+  ],
+  "modes": [
+    {
+      "id": "original",
+      "name": "Original Mode",
+      "description": "Classic Ball Defender gameplay"
+    },
+    {
+      "id": "ice", 
+      "name": "Ice Mode",
+      "description": "Freeze blocks and ice physics"
+    },
+    {
+      "id": "ballGoBoom",
+      "name": "Ball Go Boom", 
+      "description": "Explosive ball detonation mode"
+    }
+  ],
+  "performance": {
+    "target_fps": 60,
+    "mobile_optimization": true,
+    "device_profiles": ["phone", "tablet", "desktop"],
+    "performance_modes": ["potato", "low", "medium", "high", "ultra"]
+  },
+  "deployment": {
+    "platform": "GitHub Pages",
+    "auto_deploy": true,
+    "performance_testing": true,
+    "pwa_validation": true
+  }
+}

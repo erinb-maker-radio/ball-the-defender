@@ -1,0 +1,288 @@
+/**
+ * Ball Defender - Main Application Entry Point
+ * ==========================================
+ * GitHub Architecture - Direct Canvas Game
+ */
+
+// Game Configuration - GitHub Version
+const BALL_DEFENDER_CONFIG = {
+    version: '2.0.0-github',
+    architecture: 'github-original',
+    menuModule: 'js/utils/main-menu.js',
+    gameModules: [
+        // Core GitHub modules
+        'js/core/color-schemes.js',
+        'js/core/block-renderers.js', 
+        'js/core/canvas-ui.js',
+        'js/core/game-core.js',
+        'js/core/plugin-manager.js',
+        'js/core/canvas-plugin-system.js',
+        
+        // GitHub utilities
+        'js/utils/force-canvas-clear.js',
+        'js/utils/canvas-size-optimizer.js',
+        'js/utils/secure-time-tracker.js',
+        'js/utils/global-time-tracker.js',
+        'js/utils/return-to-menu.js',
+        'js/utils/boom-button-manager.js',
+        'js/utils/ball-go-boom-glow-enhancer.js',
+        
+        // GitHub UI
+        'js/ui/boom-button-dom.js',
+        
+        // GitHub Audio
+        'js/audio/audio-framework.js',
+        'js/audio/mobile-touch-controls.js',
+        
+        // Smart Plugin Architecture
+        'js/plugins/freeze-plugin.js',
+        'js/plugins/fractal-freeze-animation-plugin.js',
+        'js/plugins/smart-particle-plugin.js',
+        
+        // Performance Optimization Systems
+        'js/plugins/smart-particle-plugin-optimized.js',
+        'js/core/optimized-canvas-system.js',
+        'js/utils/performance-monitor.js',
+        
+        // GitHub Game Modes
+        'js/modes/mode-template-system.js',
+        'js/modes/original-mode-proper.js',
+        'js/modes/ball-go-boom-mode-proper.js',
+        'js/modes/ice-mode-proper.js',
+        
+        // GitHub Leaderboard
+        'js/leaderboard/disable-github-gist.js',
+        'js/leaderboard/secure-highscore-auth.js',
+        'js/leaderboard/simple-supabase-leaderboard.js',
+        
+        // Protected Leaderboard System
+        'js/leaderboard/PROTECTED-leaderboard-core.js',
+        'js/leaderboard/PROTECTED-supabase-integration.js',
+        
+        // Protected Theme System
+        'js/themes/PROTECTED-original-theme.js',
+        'js/core/theme-integration-system.js',
+        
+        // Main game engine
+        'js/core/game.js'
+    ]
+};
+
+/**
+ * GitHub Module Loader - Organized and reliable
+ */
+class GitHubLoader {
+    constructor() {
+        this.loadedModules = new Set();
+        this.loadingPromises = new Map();
+    }
+    
+    async loadScript(src) {
+        if (this.loadedModules.has(src)) {
+            return Promise.resolve();
+        }
+
+        if (this.loadingPromises.has(src)) {
+            return this.loadingPromises.get(src);
+        }
+
+        const promise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                this.loadedModules.add(src);
+                console.log(`✅ Loaded: ${src}`);
+                resolve();
+            };
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        });
+
+        this.loadingPromises.set(src, promise);
+        return promise;
+    }
+    
+    async loadGitHubArchitecture() {
+        console.log(`🎮 Ball Defender ${BALL_DEFENDER_CONFIG.version} - ${BALL_DEFENDER_CONFIG.architecture} Architecture`);
+        
+        // Check if mode is already selected (from HTML mode menu)
+        if (window.selectedGameMode) {
+            console.log('🎯 Mode already selected:', window.selectedGameMode, '- loading all game modules');
+            await this.loadGameModules();
+            this.initializeGameWithSelectedMode();
+        } else {
+            console.log('🚀 Loading menu first...');
+            
+            try {
+                // Load ONLY the menu module first
+                await this.loadScript(BALL_DEFENDER_CONFIG.menuModule);
+                console.log('✅ Menu loaded - waiting for mode selection');
+                
+            } catch (error) {
+                console.error('❌ Menu loading failed:', error);
+                throw error;
+            }
+        }
+    }
+    
+    async loadGameModules() {
+        console.log('🚀 Loading game modules after mode selection...');
+        
+        try {
+            for (const module of BALL_DEFENDER_CONFIG.gameModules) {
+                await this.loadScript(module);
+            }
+            
+            console.log('✅ All game modules loaded successfully!');
+            
+        } catch (error) {
+            console.error('❌ Game module loading failed:', error);
+            throw error;
+        }
+    }
+    
+    initializeGame() {
+        console.log('🎯 Menu ready - mode selection should be visible');
+        // No initialization needed - menu handles everything
+    }
+    
+    initializeGameWithSelectedMode() {
+        console.log('🚀 Initializing game with selected mode:', window.selectedGameMode);
+        
+        // Wait for all systems to load, then activate the mode properly
+        setTimeout(() => {
+            this.activateSelectedMode();
+        }, 1000);
+    }
+    
+    activateSelectedMode() {
+        const mode = window.selectedGameMode;
+        console.log('🎯 Activating mode:', mode);
+        
+        // First, try to activate the mode through the mode template system
+        if (window.ModeTemplateSystem && window.ModeTemplateSystem.getMode) {
+            try {
+                const modeInstance = window.ModeTemplateSystem.activateMode(mode);
+                if (modeInstance) {
+                    console.log('✅ Mode activated through template system:', mode);
+                    window.currentGameMode = modeInstance.definition;
+                } else {
+                    console.warn('⚠️ Mode template system failed, trying manual activation');
+                    this.manualModeActivation(mode);
+                }
+            } catch (error) {
+                console.warn('⚠️ Mode template system error:', error);
+                this.manualModeActivation(mode);
+            }
+        } else {
+            console.warn('⚠️ Mode template system not available, using manual activation');
+            this.manualModeActivation(mode);
+        }
+        
+        // Apply mode-specific styling
+        this.applyModeTheme(mode);
+        
+        // Start the game
+        setTimeout(() => {
+            if (window.startGame) {
+                console.log('🚀 Starting game with activated mode:', mode);
+                window.startGame();
+            }
+        }, 500);
+    }
+    
+    manualModeActivation(mode) {
+        console.log('🔧 Manual mode activation for:', mode);
+        
+        // Set up basic mode configurations
+        const modeConfigs = {
+            original: {
+                id: 'original',
+                name: 'Original',
+                colors: {
+                    bg: { primary: '#0a0a23', secondary: '#1a1a3a', accent: '#2a2a4a' },
+                    text: '#64ffda',
+                    blocks: '#667eea',
+                    ball: '#f093fb',
+                    accent: '#764ba2'
+                },
+                progression: [1, 6, 4, 5]
+            },
+            ballGoBoom: {
+                id: 'ballGoBoom',
+                name: 'Ball Go Boom!',
+                colors: {
+                    bg: { primary: '#230a0a', secondary: '#3a1a1a', accent: '#4a2a2a' },
+                    text: '#ffa500',
+                    blocks: '#ff6b6b',
+                    ball: '#ffff00',
+                    accent: '#ff4500'
+                },
+                progression: [1, 3, 6, 4]
+            },
+            iceFrost: {
+                id: 'iceFrost',
+                name: 'Ice Mode',
+                colors: {
+                    bg: { primary: '#0a1a2e', secondary: '#16213e', accent: '#1a2332' },
+                    text: '#4dd0e1',
+                    blocks: '#00bcd4',
+                    ball: '#b3e5fc',
+                    accent: '#00e5ff'
+                },
+                progression: [1, 4, 5, 6]
+            }
+        };
+        
+        window.currentGameMode = modeConfigs[mode] || modeConfigs.original;
+        console.log('✅ Manual mode config set:', window.currentGameMode);
+    }
+    
+    applyModeTheme(mode) {
+        console.log('🎨 Applying theme for mode:', mode);
+        
+        const modeConfig = window.currentGameMode;
+        if (!modeConfig || !modeConfig.colors) {
+            console.warn('⚠️ No mode config available for theming');
+            return;
+        }
+        
+        // Apply CSS variables for the theme
+        const root = document.documentElement;
+        const colors = modeConfig.colors;
+        
+        root.style.setProperty('--bg-primary', colors.bg.primary);
+        root.style.setProperty('--bg-secondary', colors.bg.secondary);
+        root.style.setProperty('--bg-accent', colors.bg.accent);
+        root.style.setProperty('--text-color', colors.text);
+        root.style.setProperty('--accent-color', colors.accent);
+        
+        // Update body background
+        document.body.style.background = `linear-gradient(135deg, ${colors.bg.primary} 0%, ${colors.bg.secondary} 50%, ${colors.bg.accent} 100%)`;
+        
+        // Add mode class to body
+        document.body.className = `mode-${mode}`;
+        
+        console.log('✅ Theme applied for mode:', mode);
+    }
+    
+}
+
+/**
+ * GitHub Application Startup
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log(`🎮 Ball Defender v${BALL_DEFENDER_CONFIG.version} - ${BALL_DEFENDER_CONFIG.architecture} Architecture`);
+    
+    const loader = new GitHubLoader();
+    await loader.loadGitHubArchitecture();
+    
+    // Expose loader globally so menu can trigger game module loading
+    window.GameLoader = loader;
+});
+
+// Export GitHub API
+window.BallDefender = {
+    config: BALL_DEFENDER_CONFIG,
+    architecture: 'GitHub Original Architecture'
+};

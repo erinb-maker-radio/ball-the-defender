@@ -1,0 +1,17 @@
+{
+  "version": "8.6.0",
+  "releaseDate": "2025-08-19",
+  "description": "Performance Optimization & Ball Go Boom Fixes",
+  "features": [
+    "Frame-rate independent physics with delta time capping",
+    "Automatic particle system optimization for slow devices",
+    "Fixed Ball Go Boom detonator button infinity mirror bug",
+    "Manual performance controls (potato/low/medium/high/ultra modes)",
+    "Real-time FPS monitoring and auto-quality adjustment",
+    "Complete Ice Mode freeze functionality with visual overlays"
+  ],
+  "breaking": false,
+  "minVersion": "8.0.0",
+  "changelog": "https://github.com/your-username/ball-defender-game/releases",
+  "downloadUrl": "https://github.com/your-username/ball-defender-game/archive/refs/heads/master.zip"
+}

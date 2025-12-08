@@ -1,0 +1,55 @@
+{
+  "mode": "original",
+  "loops": [
+    {
+      "file": "audio/loops/swing-68bpm.flac",
+      "name": "Swing",
+      "bpm": 68,
+      "triggerOn": 5000,
+      "triggerOff": null,
+      "volume": 0.7,
+      "halftime": true,
+      "halfLoop": true
+    },
+    {
+      "file": "audio/loops/rising-fill-91bpm.flac",
+      "name": "Rising Fill",
+      "bpm": 91,
+      "triggerOn": 8000,
+      "triggerOff": null,
+      "volume": 0.83,
+      "halftime": true,
+      "halfLoop": true
+    },
+    {
+      "file": "audio/loops/funk-jazz-114bpm.flac",
+      "name": "Funk Jazz",
+      "bpm": 114,
+      "triggerOn": 10000,
+      "triggerOff": null,
+      "volume": 0.75,
+      "halftime": false,
+      "halfLoop": true
+    },
+    {
+      "file": "audio/loops/chilled-69bpm.flac",
+      "name": "Chilled",
+      "bpm": 69,
+      "triggerOn": 14000,
+      "triggerOff": null,
+      "volume": 0.78,
+      "halftime": true,
+      "halfLoop": false
+    },
+    {
+      "file": "audio/loops/Drum-and-bass-loop-102-bpm.wav",
+      "name": "Drum & Bass",
+      "bpm": 102,
+      "triggerOn": 20000,
+      "triggerOff": null,
+      "volume": 0.7,
+      "halftime": false,
+      "halfLoop": false
+    }
+  ]
+}

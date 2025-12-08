@@ -1,0 +1,204 @@
+/**
+ * Ball Defender - Main Application Entry Point
+ * ==========================================
+ * Organized module loader and game initialization
+ */
+
+// Game Configuration
+const GAME_CONFIG = {
+    version: '2.0.0',
+    debug: false, // Set to false for production
+    modules: {
+        core: [
+            'js/core/color-schemes.js',
+            'js/core/block-renderers.js', 
+            'js/core/canvas-ui.js',
+            'js/core/game-core.js'
+        ],
+        utils: [
+            'js/utils/force-canvas-clear.js',
+            'js/utils/canvas-refresh-fix.js',
+            'js/utils/canvas-size-optimizer.js',
+            'js/utils/secure-time-tracker.js',
+            'js/utils/global-time-tracker.js',
+            'js/utils/main-menu.js',
+            'js/utils/return-to-menu.js',
+            'js/utils/boom-button-manager.js',
+            'js/utils/performance-optimizer.js',
+            'js/utils/ball-go-boom-glow-enhancer.js'
+        ],
+        ui: [
+            'js/ui/boom-button-dom.js'
+        ],
+        audio: [
+            'js/audio/audio-framework.js',
+            'js/audio/mobile-touch-controls.js'
+        ],
+        modes: [
+            'js/modes/mode-template-system.js',
+            'js/modes/original-mode-proper.js',
+            'js/modes/ball-go-boom-mode-proper.js',
+            'js/modes/ice-mode-proper.js'
+        ],
+        leaderboard: [
+            'js/leaderboard/disable-github-gist.js',
+            'js/leaderboard/secure-highscore-auth.js?v=1.2',
+            'js/leaderboard/simple-supabase-leaderboard.js?v=1.2'
+        ],
+        game: [
+            'js/core/game.js' // Main game engine - load last
+        ]
+    },
+    debugModules: [
+        'js/debug/debug-everything.js',
+        'js/debug/debug-gist-loading.js',
+        'js/debug/debug-mode-loading.js',
+        'js/debug/debug-infinity-mirror.js',
+        'js/debug/debug-freeze-hit.js',
+        'js/debug/debug-ice-activation.js',
+        'js/debug/debug-block-movement.js',
+        'js/debug/debug-movement-check.js'
+    ],
+    legacyModules: [
+        // 'js/legacy/absolute-boom-override.js', // Disabled - causes invisible blocks
+        // 'js/legacy/neon-chaser-effects.js', // Disabled - causes excessive animations in Ball Go Boom
+        'js/legacy/force-exploder-test.js',
+        // 'js/legacy/ball-detonator.js', // TEMPORARILY DISABLED - investigating invisible blocks
+        'js/legacy/clear-local-scores.js',
+        'js/legacy/force-ice-mode-creation.js'
+    ]
+};
+
+/**
+ * Module Loader
+ */
+class ModuleLoader {
+    constructor() {
+        this.loadedModules = new Set();
+        this.loadingPromises = new Map();
+    }
+
+    /**
+     * Load a single script
+     */
+    async loadScript(src) {
+        if (this.loadedModules.has(src)) {
+            return Promise.resolve();
+        }
+
+        if (this.loadingPromises.has(src)) {
+            return this.loadingPromises.get(src);
+        }
+
+        const promise = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => {
+                this.loadedModules.add(src);
+                resolve();
+            };
+            script.onerror = () => reject(new Error(`Failed to load ${src}`));
+            document.head.appendChild(script);
+        });
+
+        this.loadingPromises.set(src, promise);
+        return promise;
+    }
+
+    /**
+     * Load modules in sequence
+     */
+    async loadModuleGroup(modules) {
+        for (const module of modules) {
+            try {
+                await this.loadScript(module);
+                console.log(`✅ Loaded: ${module}`);
+            } catch (error) {
+                console.error(`❌ Failed to load: ${module}`, error);
+            }
+        }
+    }
+
+    /**
+     * Load all game modules
+     */
+    async loadGameModules() {
+        console.log('🚀 Starting Ball Defender Module Loading...');
+        
+        try {
+            // Load core modules first
+            console.log('📦 Loading Core Modules...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.core);
+            
+            // Load utilities
+            console.log('🔧 Loading Utilities...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.utils);
+            
+            // Load UI components
+            console.log('🎨 Loading UI Components...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.ui);
+            
+            // Load audio system
+            console.log('🔊 Loading Audio System...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.audio);
+            
+            // Load game modes
+            console.log('🎮 Loading Game Modes...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.modes);
+            
+            // Load leaderboard system
+            console.log('🏆 Loading Leaderboard System...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.leaderboard);
+            
+            // Load main game engine last
+            console.log('⚡ Loading Game Engine...');
+            await this.loadModuleGroup(GAME_CONFIG.modules.game);
+            
+            // Load debug modules if enabled
+            if (GAME_CONFIG.debug) {
+                console.log('🐛 Loading Debug Modules...');
+                await this.loadModuleGroup(GAME_CONFIG.debugModules);
+            }
+            
+            // Load legacy modules (for compatibility)
+            console.log('📜 Loading Legacy Modules...');
+            await this.loadModuleGroup(GAME_CONFIG.legacyModules);
+            
+            console.log('✅ All modules loaded successfully!');
+            this.initializeGame();
+            
+        } catch (error) {
+            console.error('❌ Module loading failed:', error);
+        }
+    }
+
+    /**
+     * Initialize the game after all modules are loaded
+     */
+    initializeGame() {
+        console.log('🎯 Initializing Ball Defender...');
+        
+        // Game should be ready now
+        if (typeof window.gameCore !== 'undefined') {
+            console.log('✅ Game initialized successfully!');
+        } else {
+            console.warn('⚠️ Game core not found - checking compatibility...');
+        }
+    }
+}
+
+/**
+ * Application Startup
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    console.log(`🎮 Ball Defender v${GAME_CONFIG.version} - Organized Architecture`);
+    
+    const loader = new ModuleLoader();
+    loader.loadGameModules();
+});
+
+// Export for debugging
+window.BallDefender = {
+    config: GAME_CONFIG,
+    loader: null
+};

@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="pragma" content="no-cache">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="background-color" content="#1a1a2e">
+    <meta name="description" content="Multi-mode physics ball game with Ice Mode, Ball Go Boom, and more!">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ball, The Defender">
+    <meta name="application-name" content="Ball, The Defender">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    
+    <title>Ball, The Defender</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="assets/manifest.json">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css?v=9">
+    <link rel="stylesheet" href="css/responsive-mobile.css?v=1">
+    
+    <!-- PWA Icons -->
+    <!-- Note: Icon files need to be created and placed in assets/icons/ directory -->
+    <!-- Temporarily commented out to prevent 404 errors -->
+    <!--
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="assets/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="assets/icons/icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="assets/icons/icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="assets/icons/icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/icons/icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="assets/icons/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="assets/icons/icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="57x57" href="assets/icons/icon-57x57.png">
+    -->
+
+    <!-- Sprite Loaders -->
+    <script>
+        // Preload ball sprite
+        window.ballSprite = new Image();
+        window.ballSprite.src = 'assets/images/ball-sprite.png';
+        window.ballSprite.onload = function() {
+            console.log('Ball sprite loaded successfully');
+        };
+        window.ballSprite.onerror = function() {
+            console.log('Ball sprite not found - using default circle');
+        };
+
+        // Launcher sprite sheet (5-frame animation)
+        window.launcherSprite = new Image();
+        window.launcherSprite.src = 'assets/images/launcher-spritesheet.png';
+        window.launcherSprite.frameCount = 5;
+        window.launcherSprite.currentFrame = 0;
+        window.launcherSprite.frameTime = 200; // ms per frame
+        window.launcherSprite.lastFrameChange = 0;
+        window.launcherSprite.mirrored = false;
+        window.launcherSprite.nextFlipTime = Date.now() + 1000 + Math.random() * 3000; // 1-4 seconds
+        window.launcherSprite.onload = function() {
+            window.launcherSprite.frameWidth = this.naturalWidth / window.launcherSprite.frameCount;
+            window.launcherSprite.frameHeight = this.naturalHeight;
+            console.log('Launcher sprite sheet loaded: ' + window.launcherSprite.frameCount + ' frames');
+        };
+        window.launcherSprite.onerror = function() {
+            console.log('Launcher sprite sheet not found - using ball sprite');
+            window.launcherSprite = window.ballSprite;
+        };
+    </script>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <img src="assets/Ball the Defender logo.png" alt="Ball, The Defender" class="loading-logo">
+            <div class="loading-bar-container">
+                <div class="loading-bar"></div>
+            </div>
+            <div class="loading-text">Loading</div>
+        </div>
+    </div>
+
+    <!-- Game Layout -->
+    <div class="game-layout">
+        <!-- Left Sidebar -->
+                <div class="game-sidebar">
+            <!-- CURRENT GAME Stats (moved above high scores) -->
+            <div class="stats-panel">
+                <div class="stats-grid">
+                    <div class="stat-item-grid">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-item-grid">
+                        <div class="stat-label">Balls</div>
+                        <div class="stat-value" id="ballsLeft">1</div>
+                    </div>
+                </div>
+                <!-- Hidden elements for game engine -->
+                <div style="display: none;">
+                    <div id="blocksLeft">0</div>
+                    <div id="level">1</div>
+                    <div id="blocksDestroyed">0</div>
+                </div>
+            </div>
+            
+            <!-- HIGH SCORES Section (moved below stats) -->
+            <div class="arcade-leaderboard">
+                <div class="arcade-header">HIGH SCORES</div>
+                <div class="arcade-scores" id="leaderboard">
+                    <!-- Leaderboard entries will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- PLAY TIME -->
+            <div class="time-panel">
+                <div class="time-header">⏱️ PLAYTIME</div>
+                <div class="time-counter personal">
+                    <div class="time-label">Your Time</div>
+                    <div class="time-display-compact" id="localTimeDigits">
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit day-digit">0</span><span class="digit day-digit">0</span><span class="digit day-digit">0</span>
+                            </div>
+                            <div class="time-unit">d</div>
+                        </div>
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit hour-digit">0</span><span class="digit hour-digit">0</span>
+                            </div>
+                            <div class="time-unit">h</div>
+                        </div>
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit minute-digit">0</span><span class="digit minute-digit">0</span>
+                            </div>
+                            <div class="time-unit">m</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="time-counter global">
+                    <div class="time-label">Global Time</div>
+                    <div class="time-display-compact" id="globalTimeDigits">
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit day-digit">0</span><span class="digit day-digit">0</span><span class="digit day-digit">0</span>
+                            </div>
+                            <div class="time-unit">d</div>
+                        </div>
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit hour-digit">0</span><span class="digit hour-digit">0</span>
+                            </div>
+                            <div class="time-unit">h</div>
+                        </div>
+                        <div class="time-segment">
+                            <div class="digit-group">
+                                <span class="digit minute-digit">0</span><span class="digit minute-digit">0</span>
+                            </div>
+                            <div class="time-unit">m</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Controls -->
+            <div class="game-controls">
+                <div class="control-buttons-row">
+                    <button id="returnToMenuBtn" style="display: none;">↩ MENU</button>
+                    <button id="pauseBtn" style="display: none;">PAUSE</button>
+                    <button id="endGameBtn" style="display: none;">END GAME</button>
+                </div>
+                <button id="prestigeBtn" style="display: none;">⭐ PRESTIGE</button>
+            </div>
+
+            <div class="speed-control" style="display: none;">
+                <label for="speedSlider">Block Speed</label>
+                <input type="range" id="speedSlider" min="0.1" max="3.0" step="0.1" value="1.0">
+                <span id="speedValue">1.0x</span>
+            </div>
+            <div class="instructions" id="instructions">
+            </div>
+            
+        </div>
+        
+        <!-- Game Canvas Area -->
+        <div class="game-area">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+            </div>
+            
+    <!-- Name Input Modal -->
+    <div class="name-input-modal" id="nameInputModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏆 HIGH SCORE!</h2>
+                <p>Enter your name for the leaderboard:</p>
+                </div>
+            <div class="modal-body">
+                <input type="text" id="playerNameInput" maxlength="18" placeholder="Your Name">
+                <div class="score-display">
+                    Score: <span id="finalScore">0</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="submitScore" class="primary-button">Submit Score</button>
+                <button id="skipScore" class="secondary-button">Skip</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ============================================= -->
+    <!-- ORGANIZED MODULE LOADING SYSTEM             -->
+    <!-- ============================================= -->
+    
+    <!-- Main Module Loader (loads everything else) -->
+    <script src="js/main.js"></script>
+
+    <!-- Adaptive Drum Layer System -->
+    <script src="js/audio/drum-layer-system.js"></script>
+
+    <!-- Volume Control -->
+    <script>
+        class VolumeControl {
+            constructor() {
+                this.volume = 85; // 0-100 percentage
+                this.isMuted = false;
+                this.savedVolume = 85; // Volume before muting
+                this.storageKey = 'ballDefender_volume';
+                this.init();
+            }
+
+            init() {
+                // Restore persisted volume
+                this.loadPersistedState();
+
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeIcon = document.getElementById('volumeIcon');
+
+                if (volumeSlider) {
+                    // Slider change handler
+                    volumeSlider.addEventListener('input', (e) => {
+                        this.setVolume(parseInt(e.target.value));
+                    });
+                }
+
+                if (volumeIcon) {
+                    // Click icon to toggle mute
+                    volumeIcon.addEventListener('click', () => {
+                        this.toggleMute();
+                    });
+                }
+
+                // Keyboard shortcut: "m" to mute/unmute
+                document.addEventListener('keydown', (e) => {
+                    if (e.key.toLowerCase() === 'm' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+                        // Don't trigger if typing in an input
+                        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                            e.preventDefault();
+                            this.toggleMute();
+                        }
+                    }
+                });
+
+                // Initial render and apply volume
+                this.updateUI();
+                setTimeout(() => this.applyVolume(), 1000);
+            }
+
+            loadPersistedState() {
+                const persisted = localStorage.getItem(this.storageKey);
+                if (persisted !== null) {
+                    const data = JSON.parse(persisted);
+                    this.volume = data.volume ?? 85;
+                    this.isMuted = data.muted ?? false;
+                    this.savedVolume = data.savedVolume ?? this.volume;
+                }
+            }
+
+            saveState() {
+                localStorage.setItem(this.storageKey, JSON.stringify({
+                    volume: this.volume,
+                    muted: this.isMuted,
+                    savedVolume: this.savedVolume
+                }));
+            }
+
+            setVolume(value, persist = true) {
+                this.volume = Math.max(0, Math.min(100, value));
+
+                // If setting volume above 0, unmute
+                if (this.volume > 0 && this.isMuted) {
+                    this.isMuted = false;
+                }
+
+                // If setting volume to 0, consider it muted
+                if (this.volume === 0) {
+                    this.isMuted = true;
+                }
+
+                this.applyVolume();
+                this.updateUI();
+
+                if (persist) {
+                    this.saveState();
+                }
+            }
+
+            toggleMute() {
+                if (this.isMuted) {
+                    // Unmute - restore saved volume
+                    this.isMuted = false;
+                    this.volume = this.savedVolume || 85;
+                } else {
+                    // Mute - save current volume first
+                    this.savedVolume = this.volume > 0 ? this.volume : 85;
+                    this.isMuted = true;
+                    this.volume = 0;
+                }
+
+                this.applyVolume();
+                this.updateUI();
+                this.saveState();
+            }
+
+            applyVolume() {
+                if (window.audioEngine && window.audioEngine.masterGain) {
+                    const actualVolume = this.isMuted ? 0 : (this.volume / 100);
+                    const now = window.audioEngine.audioContext.currentTime;
+                    window.audioEngine.masterGain.gain.setTargetAtTime(actualVolume, now, 0.01);
+                }
+            }
+
+            updateUI() {
+                const volumeSlider = document.getElementById('volumeSlider');
+                const volumeIcon = document.getElementById('volumeIcon');
+
+                if (volumeSlider) {
+                    volumeSlider.value = this.volume;
+                }
+
+                if (volumeIcon) {
+                    if (this.isMuted || this.volume === 0) {
+                        volumeIcon.textContent = '🔇';
+                        volumeIcon.title = 'Unmute (m)';
+                    } else if (this.volume < 50) {
+                        volumeIcon.textContent = '🔉';
+                        volumeIcon.title = 'Mute (m)';
+                    } else {
+                        volumeIcon.textContent = '🔊';
+                        volumeIcon.title = 'Mute (m)';
+                    }
+                }
+            }
+        }
+
+        // Initialize volume control when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            window.volumeControl = new VolumeControl();
+            initializeTimeDisplays();
+            initializeBlocksDestroyedCounter();
+        });
+
+        // Creative Digital Time Display System
+        function initializeTimeDisplays() {
+            function updateDigitalTime(containerId, totalSeconds, isGlobal = false) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+                // Update day digits
+                const dayDigits = container.querySelectorAll('.day-digit');
+                const dayStr = String(days).padStart(3, '0');
+                dayDigits.forEach((digit, index) => {
+                    digit.textContent = dayStr[index] || '0';
+                });
+
+                // Update hour digits
+                const hourDigits = container.querySelectorAll('.hour-digit');
+                const hourStr = String(hours).padStart(2, '0');
+                hourDigits.forEach((digit, index) => {
+                    digit.textContent = hourStr[index] || '0';
+                });
+
+                // Update minute digits
+                const minuteDigits = container.querySelectorAll('.minute-digit');
+                const minuteStr = String(minutes).padStart(2, '0');
+                minuteDigits.forEach((digit, index) => {
+                    digit.textContent = minuteStr[index] || '0';
+                });
+
+            }
+            
+            function updateTimeDisplays() {
+                if (window.GlobalTimeTracker) {
+                    const localSeconds = Math.floor(window.GlobalTimeTracker.getCurrentSessionTime() / 1000);
+                    const globalSeconds = Math.floor(window.GlobalTimeTracker.getGlobalTime() / 1000);
+
+                    updateDigitalTime('localTimeDigits', localSeconds, false);
+                    updateDigitalTime('globalTimeDigits', globalSeconds, true);
+                } else {
+                    // Fallback: try to load global time directly from Supabase
+                    loadGlobalTimeDirectly();
+                }
+            }
+
+            // Direct Supabase fetch for global time (fallback)
+            let lastGlobalFetch = 0;
+            async function loadGlobalTimeDirectly() {
+                const now = Date.now();
+                if (now - lastGlobalFetch < 30000) return; // Only fetch every 30 seconds
+                lastGlobalFetch = now;
+
+                try {
+                    const response = await fetch('https://bxhcbyypjfzpuxhftppv.supabase.co/rest/v1/ball_defender_global_stats', {
+                        headers: {
+                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ4aGNieXlwamZ6cHV4aGZ0cHB2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU4OTM4MTIsImV4cCI6MjA3MTQ2OTgxMn0.cOakT3KAfQiegW9YuAoS6pXXeo9u5C-xpriWVqLPpGs'
+                        }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data[0] && data[0].total_time_played_ms) {
+                            const globalSeconds = Math.floor(data[0].total_time_played_ms / 1000);
+                            updateDigitalTime('globalTimeDigits', globalSeconds, true);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Could not load global time:', e);
+                }
+            }
+            
+            // Update every second
+            setInterval(updateTimeDisplays, 1000);
+            updateTimeDisplays(); // Initial update
+
+            // Load global time immediately on page load
+            loadGlobalTimeDirectly();
+        }
+
+        // Blocks Destroyed Counter System
+        function initializeBlocksDestroyedCounter() {
+            window.blocksDestroyedCount = 0;
+            
+            // Hook into the game to track when blocks are destroyed
+            function trackBlockDestruction() {
+                if (!window.blocks) return;
+                
+                // Check for destroyed blocks and increment counter
+                window.blocks.forEach(block => {
+                    if (block.destroyed && !block.countedAsDestroyed) {
+                        window.blocksDestroyedCount++;
+                        block.countedAsDestroyed = true; // Mark as counted to avoid double counting
+                        updateBlocksDestroyedDisplay();
+                    }
+                });
+            }
+            
+            function updateBlocksDestroyedDisplay() {
+                const display = document.getElementById('blocksDestroyed');
+                if (display) {
+                    display.textContent = window.blocksDestroyedCount;
+                }
+            }
+            
+            // Reset counter when game starts
+            function resetBlocksDestroyedCounter() {
+                window.blocksDestroyedCount = 0;
+                updateBlocksDestroyedDisplay();
+            }
+            
+            // Monitor for game state changes
+            setInterval(() => {
+                if (window.gameState === 'playing') {
+                    trackBlockDestruction();
+                } else if (window.gameState === 'stopped' || window.gameState === 'menu') {
+                    // Reset counter when game ends or returns to menu
+                    if (window.blocksDestroyedCount > 0) {
+                        resetBlocksDestroyedCounter();
+                    }
+                }
+            }, 100); // Check frequently for responsive updates
+            
+            // Expose reset function globally so game can call it
+            window.resetBlocksDestroyedCounter = resetBlocksDestroyedCounter;
+            
+            console.log('✅ Blocks destroyed counter initialized');
+        }
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Force clear old service worker caches on load
+        if ('serviceWorker' in navigator) {
+            // First, clear all caches
+            caches.keys().then(function(names) {
+                for (let name of names) {
+                    console.log('🗑️ Clearing cache:', name);
+                    caches.delete(name);
+                }
+            });
+
+            // Then register fresh service worker
+            navigator.serviceWorker.register('sw.js').then(function(registration) {
+                console.log('SW registered: ', registration);
+                // Force update check
+                registration.update();
+            }).catch(function(registrationError) {
+                console.log('SW registration failed: ', registrationError);
+            });
+        }
+    </script>
+
+    <!-- Volume Control Styles -->
+    <style>
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+        }
+
+        .volume-icon {
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.15s ease;
+        }
+
+        .volume-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 60px;
+            height: 4px;
+            border-radius: 2px;
+            background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Loading Screen Styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2d2d3a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-content {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-logo {
+            height: 100vh;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .loading-bar-container {
+            position: absolute;
+            bottom: calc(6% + 35px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(0, 0, 0, 0.4);
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 30%;
+            background: #ff6b6b;
+            border-radius: 6px;
+            animation: loadingSlide 2s ease-in-out infinite, loadingGlow 1.5s ease-in-out infinite;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.8), 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes loadingSlide {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(250%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        @keyframes loadingGlow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(255, 107, 107, 0.8), 0 0 20px rgba(255, 107, 107, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 18px rgba(255, 107, 107, 1), 0 0 30px rgba(255, 107, 107, 0.7);
+            }
+        }
+
+        .loading-text {
+            position: absolute;
+            bottom: calc(3% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.8);
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Sound Sculpt Popup */
+        .sculpt-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .sculpt-popup-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 40px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .sculpt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sculpt-header h2 {
+            color: #667eea;
+            font-size: 1.4rem;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid rgba(255, 100, 100, 0.5);
+            color: #ff6464;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 100, 100, 0.4);
+            transform: scale(1.1);
+        }
+
+        .sculpt-sections {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .sculpt-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+        }
+
+        .sculpt-section h3 {
+            color: #64ffda;
+            font-size: 0.9rem;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .sculpt-control {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 10px;
+        }
+
+        .sculpt-control:last-child {
+            margin-bottom: 0;
+        }
+
+        .sculpt-control label {
+            color: #888;
+            font-size: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sculpt-control input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .sculpt-control input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #667eea;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .sculpt-control input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+
+        .value-display {
+            color: #667eea;
+            font-size: 0.7rem;
+            text-align: right;
+        }
+
+        #soundSculptBtn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        #soundSculptBtn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+        }
+
+        @media (max-width: 500px) {
+            .sculpt-sections {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Audio Editor Popup (iframe-based full sequencer) -->
+    <div id="soundSculptPopup" class="audio-editor-popup" style="display: none;" onclick="if(event.target===this) closeAudioEditor();">
+        <div class="audio-editor-container">
+            <div class="audio-editor-header">
+                <span>🎛️ Audio Sequencer</span>
+                <div class="audio-editor-controls">
+                    <button onclick="closeAudioEditor();" class="editor-close-btn">✕ Close</button>
+                </div>
+            </div>
+            <iframe id="audioEditorFrame" src="audio-editor.html" frameborder="0"></iframe>
+        </div>
+    </div>
+
+    <style>
+        .audio-editor-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audio-editor-container {
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            border-radius: 0;
+            overflow: hidden;
+            box-shadow: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .audio-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .audio-editor-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .editor-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .editor-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #audioEditorFrame {
+            flex: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+
+    <script>
+        // Audio Editor Bridge - connects game to iframe sequencer
+        const AudioEditorBridge = {
+            iframe: null,
+            isPlaying: false,
+
+            init() {
+                this.iframe = document.getElementById('audioEditorFrame');
+                // Listen for messages from the audio editor
+                window.addEventListener('message', (e) => {
+                    if (e.data.type === 'audioEditorReady') {
+                        console.log('🎛️ Audio Editor ready');
+                    }
+                    if (e.data.type === 'audioEditorPlaying') {
+                        this.isPlaying = e.data.playing;
+                    }
+                });
+            },
+
+            sendCommand(command, data = {}) {
+                if (this.iframe && this.iframe.contentWindow) {
+                    this.iframe.contentWindow.postMessage({ type: command, ...data }, '*');
+                }
+            },
+
+            play() {
+                this.sendCommand('play');
+                this.isPlaying = true;
+            },
+
+            stop() {
+                this.sendCommand('stop');
+                this.isPlaying = false;
+            },
+
+            pause() {
+                this.sendCommand('pause');
+            },
+
+            resume() {
+                this.sendCommand('resume');
+            },
+
+            setMode(mode) {
+                this.sendCommand('setMode', { mode });
+            }
+        };
+
+        // Initialize bridge when DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            AudioEditorBridge.init();
+        });
+
+        // Hook into game start - auto-play audio editor
+        const originalStartGame = window.startGame;
+        window.addEventListener('load', () => {
+            // Wait for game.js to define startGame
+            const checkStartGame = setInterval(() => {
+                if (window.startGame && window.startGame !== originalStartGame) {
+                    const gameStartGame = window.startGame;
+                    window.startGame = function(...args) {
+                        const result = gameStartGame.apply(this, args);
+                        // Start audio editor playback when game starts
+                        setTimeout(() => {
+                            console.log('🎵 Starting Audio Editor playback...');
+                            AudioEditorBridge.play();
+                        }, 500);
+                        return result;
+                    };
+                    clearInterval(checkStartGame);
+                }
+            }, 100);
+        });
+
+        // Hook into game stop
+        window.addEventListener('load', () => {
+            const checkStopGame = setInterval(() => {
+                if (window.stopGame) {
+                    const gameStopGame = window.stopGame;
+                    window.stopGame = function(...args) {
+                        AudioEditorBridge.stop();
+                        return gameStopGame.apply(this, args);
+                    };
+                    clearInterval(checkStopGame);
+                }
+            }, 100);
+        });
+
+        function openAudioEditor() {
+            document.getElementById('soundSculptPopup').style.display = 'flex';
+
+            // Send current game mode to audio editor
+            const currentMode = window.currentGameMode?.id || window.selectedGameMode || localStorage.getItem('ballDefender_selectedMode') || 'original';
+            const iframe = document.getElementById('audioEditorFrame');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage({ type: 'setMode', mode: currentMode }, '*');
+                console.log('🎛️ Audio editor opened with mode:', currentMode);
+            }
+        }
+
+        function closeAudioEditor() {
+            document.getElementById('soundSculptPopup').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

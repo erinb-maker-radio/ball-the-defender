@@ -1,0 +1,139 @@
+// Canvas Refresh Fix for Ball Defender
+// Ensures canvas is properly cleared on every frame to prevent trails
+
+(function() {
+    console.log('🖼️ Canvas Refresh Fix Loading...');
+    
+    // Override drawAnimatedBackground to ensure it ALWAYS clears the canvas
+    function ensureCanvasClearing() {
+        // Wait for the main game to load
+        const checkForGame = setInterval(() => {
+            if (window.canvas && window.ctx && window.drawAnimatedBackground) {
+                clearInterval(checkForGame);
+                
+                console.log('🖼️ Applying canvas refresh fix...');
+                
+                // Store the original function
+                const originalDrawBackground = window.drawAnimatedBackground;
+                
+                // Override with a guaranteed canvas clearing version
+                window.drawAnimatedBackground = function() {
+                    try {
+                        // Ensure we have valid canvas and context
+                        if (!window.ctx || !window.canvas) {
+                            console.warn('🖼️ Canvas or context missing in drawAnimatedBackground');
+                            return;
+                        }
+                        
+                        // FORCE clear the entire canvas - this is the critical fix
+                        window.ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
+                        
+                        // Then fill with background color
+                        window.ctx.fillStyle = '#0a0a23'; // Dark blue background
+                        window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
+                        
+                        // Add subtle grid pattern for better visual feedback
+                        if (!window.performanceMode) {
+                            window.ctx.strokeStyle = 'rgba(100, 255, 218, 0.05)';
+                            window.ctx.lineWidth = 1;
+                            
+                            // Vertical lines
+                            for (let x = 0; x < window.canvas.width; x += 50) {
+                                window.ctx.beginPath();
+                                window.ctx.moveTo(x, 0);
+                                window.ctx.lineTo(x, window.canvas.height);
+                                window.ctx.stroke();
+                            }
+                            
+                            // Horizontal lines
+                            for (let y = 0; y < window.canvas.height; y += 50) {
+                                window.ctx.beginPath();
+                                window.ctx.moveTo(0, y);
+                                window.ctx.lineTo(window.canvas.width, y);
+                                window.ctx.stroke();
+                            }
+                            
+
+                        }
+                        
+                        // console.log('🖼️ Canvas cleared and background drawn');
+                        
+                    } catch (error) {
+                        console.error('🖼️ Error in canvas refresh fix:', error);
+                        
+                        // Fallback - just clear and fill with solid color
+                        try {
+                            window.ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
+                            window.ctx.fillStyle = '#0a0a23';
+                            window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
+                        } catch (fallbackError) {
+                            console.error('🖼️ Fallback canvas clear also failed:', fallbackError);
+                        }
+                    }
+                };
+                
+                console.log('✅ Canvas refresh fix applied - trails should now be eliminated');
+                
+                // Also add a fallback clear function that can be called manually
+                window.forceCanvasClear = function() {
+                    console.log('🖼️ Force clearing canvas...');
+                    try {
+                        if (window.ctx && window.canvas) {
+                            window.ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
+                            window.ctx.fillStyle = '#0a0a23';
+                            window.ctx.fillRect(0, 0, window.canvas.width, window.canvas.height);
+                            console.log('✅ Force clear completed');
+                        }
+                    } catch (e) {
+                        console.error('❌ Force clear failed:', e);
+                    }
+                };
+                
+                // Override the gameLoop to add extra canvas clearing as a safety net
+                if (window.gameLoop) {
+                    const originalGameLoop = window.gameLoop;
+                    
+                    window.gameLoop = function() {
+                        try {
+                            // Extra safety: clear canvas at the start of each frame
+                            if (window.ctx && window.canvas) {
+                                window.ctx.clearRect(0, 0, window.canvas.width, window.canvas.height);
+                            }
+                            
+                            // Call the original game loop
+                            originalGameLoop.call(this);
+                            
+                        } catch (error) {
+                            console.error('🖼️ Error in enhanced gameLoop:', error);
+                            // Try to call original function anyway
+                            try {
+                                originalGameLoop.call(this);
+                            } catch (fallbackError) {
+                                console.error('🖼️ Original gameLoop also failed:', fallbackError);
+                            }
+                        }
+                    };
+                    
+                    console.log('✅ Enhanced gameLoop with extra canvas clearing');
+                }
+                
+            }
+        }, 100);
+        
+        // Safety timeout - if game doesn't load in 10 seconds, stop trying
+        setTimeout(() => {
+            clearInterval(checkForGame);
+        }, 10000);
+    }
+    
+    // Start the fix process
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureCanvasClearing);
+    } else {
+        ensureCanvasClearing();
+    }
+    
+    console.log('🖼️ Canvas refresh fix ready - will eliminate ball and block trails');
+    console.log('💡 Type forceCanvasClear() in console to manually clear canvas');
+    
+})();
