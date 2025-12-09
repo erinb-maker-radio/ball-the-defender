@@ -1043,88 +1043,16 @@
         
         // Ball Go Boom button is now handled by boom-button-manager.js via Canvas UI
 
-        // Zoom the clicked mode button to fill screen
-        function zoomModeButton(callback) {
-            const clickedBtn = window._clickedModeButton;
+        // Mode transition - let mode-template-system handle the zoom animation
+        function startModeTransition(callback) {
+            // Hide the main menu immediately
             const menuContainer = document.getElementById('mainMenu');
-
-            if (!clickedBtn || !menuContainer) {
-                if (callback) callback();
-                return;
+            if (menuContainer) {
+                menuContainer.style.display = 'none';
             }
 
-            // Get the image from the button
-            const img = clickedBtn.querySelector('img');
-            if (!img) {
-                if (callback) callback();
-                return;
-            }
-
-            // Get button's current position
-            const rect = clickedBtn.getBoundingClientRect();
-
-            // Hide other buttons and content
-            const otherButtons = menuContainer.querySelectorAll('.mode-image-btn');
-            otherButtons.forEach(btn => {
-                if (btn !== clickedBtn) {
-                    btn.style.transition = 'opacity 0.3s ease';
-                    btn.style.opacity = '0';
-                }
-            });
-
-            // Hide the title image
-            const titleImg = menuContainer.querySelector('.menu-title-img');
-            if (titleImg) {
-                titleImg.style.transition = 'opacity 0.3s ease';
-                titleImg.style.opacity = '0';
-            }
-
-            // Create a clone for the zoom animation
-            const zoomImg = img.cloneNode(true);
-            zoomImg.style.cssText = `
-                position: fixed;
-                left: ${rect.left}px;
-                top: ${rect.top}px;
-                width: ${rect.width}px;
-                height: ${rect.height}px;
-                z-index: 10001;
-                border-radius: 12px;
-                transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                object-fit: cover;
-            `;
-            document.body.appendChild(zoomImg);
-
-            // Hide the original button
-            clickedBtn.style.opacity = '0';
-
-            // Calculate target size (fill most of screen)
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const targetWidth = Math.min(viewportWidth * 0.9, viewportHeight * 0.9);
-            const targetHeight = targetWidth; // Keep aspect ratio square-ish
-            const targetLeft = (viewportWidth - targetWidth) / 2;
-            const targetTop = (viewportHeight - targetHeight) / 2;
-
-            // Trigger the zoom animation
-            requestAnimationFrame(() => {
-                zoomImg.style.left = `${targetLeft}px`;
-                zoomImg.style.top = `${targetTop}px`;
-                zoomImg.style.width = `${targetWidth}px`;
-                zoomImg.style.height = `${targetHeight}px`;
-                zoomImg.style.borderRadius = '20px';
-                zoomImg.style.boxShadow = '0 0 100px rgba(255,255,255,0.5)';
-            });
-
-            // After animation, fade out and start game
-            setTimeout(() => {
-                zoomImg.style.transition = 'opacity 0.3s ease';
-                zoomImg.style.opacity = '0';
-
-                setTimeout(() => {
-                    zoomImg.remove();
-                    if (callback) callback();
-                }, 300);
-            }, 700);
+            // Call callback immediately - mode system will handle loading screen
+            if (callback) callback();
         }
 
         // Guard to prevent multiple startGame calls
@@ -1164,8 +1092,8 @@
             }
         }
 
-        // Start zoom animation, then start game when ready
-        zoomModeButton(() => {
+        // Start mode transition, then start game when ready
+        startModeTransition(() => {
             // After zoom completes, start game or poll until ready
             if (!checkAndStartGame()) {
                 const startPolling = setInterval(() => {
