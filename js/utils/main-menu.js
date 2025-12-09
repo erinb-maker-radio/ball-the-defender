@@ -779,18 +779,18 @@
                 .main-menu {
                     align-items: center;
                     justify-content: flex-start;
-                    padding: 10px 5px 5px 5px;
+                    padding: 25px 5px 5px 5px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 5px;
-                    gap: 8px;
+                    gap: 12px;
                     justify-content: flex-start;
                 }
                 .menu-title-img {
-                    max-width: 150px;
-                    margin-top: 5px;
-                    margin-bottom: 5px;
+                    max-width: 180px; /* 20% larger than 150px */
+                    margin-top: 8px;
+                    margin-bottom: 10px;
                 }
                 .mode-cards {
                     flex-direction: row;
@@ -807,18 +807,18 @@
                 .main-menu {
                     align-items: center;
                     justify-content: flex-start;
-                    padding: 8px 3px 3px 3px;
+                    padding: 20px 3px 3px 3px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 3px;
-                    gap: 5px;
+                    gap: 10px;
                     justify-content: flex-start;
                 }
                 .menu-title-img {
-                    max-width: 120px;
-                    margin-top: 3px;
-                    margin-bottom: 3px;
+                    max-width: 144px; /* 20% larger than 120px */
+                    margin-top: 5px;
+                    margin-bottom: 8px;
                 }
                 .mode-cards {
                     flex-direction: row;
