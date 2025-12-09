@@ -194,6 +194,65 @@ body.mobile-device .time-header {
     display: none !important;
 }
 
+/* MOBILE: Smaller stat labels (Score/Balls) and taller leaderboard */
+body.mobile-device .stats-panel {
+    padding: 4px 6px !important;
+}
+
+body.mobile-device .stats-panel .stat-label {
+    font-size: 9px !important;
+}
+
+body.mobile-device .stats-panel .stat-value {
+    font-size: 12px !important;
+}
+
+body.mobile-device .arcade-leaderboard {
+    flex: 2 !important; /* Give leaderboard more space */
+    min-height: 200px !important;
+}
+
+body.mobile-device .arcade-header {
+    font-size: 12px !important;
+    padding-bottom: 3px !important;
+    margin-bottom: 4px !important;
+}
+
+body.mobile-device .leaderboard-entry {
+    padding: 1px 4px !important;
+    font-size: 11px !important;
+}
+
+/* Also apply via max-height for landscape phones */
+@media screen and (max-height: 500px) {
+    .stats-panel {
+        padding: 3px 5px !important;
+    }
+    .stats-panel .stat-label {
+        font-size: 8px !important;
+    }
+    .stats-panel .stat-value {
+        font-size: 11px !important;
+    }
+    .arcade-leaderboard {
+        flex: 2 !important;
+        min-height: 150px !important;
+        max-height: none !important;
+    }
+    .arcade-header {
+        font-size: 11px !important;
+        padding-bottom: 2px !important;
+        margin-bottom: 3px !important;
+    }
+    .leaderboard-entry {
+        padding: 1px 3px !important;
+        font-size: 10px !important;
+    }
+    .leaderboard-score {
+        font-size: 10px !important;
+    }
+}
+
 /* Tablet Portrait (769px - 1024px) */
 @media screen and (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
     .game-layout {
