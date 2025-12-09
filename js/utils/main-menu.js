@@ -776,16 +776,51 @@
             }
 
             @media (max-height: 500px) {
+                .main-menu {
+                    align-items: flex-start;
+                    padding-top: 10px;
+                }
+                .menu-content {
+                    min-height: auto;
+                    padding: 10px;
+                    gap: 10px;
+                }
                 .menu-title-img {
-                    max-width: 250px;
-                    margin-top: -20px;
+                    max-width: 180px;
+                    margin-top: 0;
                 }
                 .mode-cards {
                     flex-direction: row;
-                    margin: -80px auto 0 auto;
+                    margin: 0 auto;
+                    gap: 10px;
                 }
                 .mode-image-btn {
-                    width: 132px;
+                    width: 120px;
+                }
+            }
+
+            /* Ultra-short landscape (phones in landscape fullscreen) */
+            @media (max-height: 400px) {
+                .main-menu {
+                    align-items: flex-start;
+                    padding-top: 5px;
+                }
+                .menu-content {
+                    min-height: auto;
+                    padding: 5px;
+                    gap: 5px;
+                }
+                .menu-title-img {
+                    max-width: 140px;
+                    margin-top: 0;
+                }
+                .mode-cards {
+                    flex-direction: row;
+                    margin: 0 auto;
+                    gap: 8px;
+                }
+                .mode-image-btn {
+                    width: 100px;
                 }
             }
             
