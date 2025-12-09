@@ -99,15 +99,25 @@ window.PROTECTED_gameOverFlow = function(currentScore) {
             isHigh = true;
         }
         
-        // Step 4: Show name dialog only if it's a top 15 score for the mode
+        // Step 4: Show name dialog only if it's a top 10 score for the mode
         if (isHigh) {
-            console.log('🔒 PROTECTED: Showing name dialog for top 15 score:', preservedScore);
+            console.log('🔒 PROTECTED: Showing name dialog for top 10 score:', preservedScore);
             window.PROTECTED_showNameDialog(preservedScore);
         } else {
-            console.log('🔒 PROTECTED: Score not in top 15 for this mode:', preservedScore);
+            console.log('🔒 PROTECTED: Score not in top 10, showing game over dialog:', preservedScore);
+            // Show game over dialog with rank (no name entry)
+            if (typeof showGameOverDialog === 'function') {
+                showGameOverDialog(preservedScore);
+            } else {
+                // Fallback: just show play again button
+                console.log('🔒 PROTECTED: showGameOverDialog not available, using fallback');
+                window.PROTECTED_showPlayAgainButton();
+            }
+            return preservedScore; // Exit early, dialog will handle play again button
         }
-        
-        // Step 5: Show PLAY AGAIN button after the flow completes
+
+        // Step 5: Show PLAY AGAIN button after the flow completes (only for high scores)
+        // Note: For non-high scores, the dialog handles this
         window.PROTECTED_showPlayAgainButton();
         
         return preservedScore;

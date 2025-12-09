@@ -656,28 +656,43 @@ function addToLeaderboard(playerName, playerScore) {
     return topLeaderboard;
 }
 
+// Get the rank/position a score would have in the leaderboard
+function getScoreRank(playerScore) {
+    const leaderboard = getLeaderboard();
+    if (leaderboard.length === 0) return 1;
+
+    // Find where this score would rank
+    for (let i = 0; i < leaderboard.length; i++) {
+        if (playerScore > leaderboard[i].score) {
+            return i + 1; // 1-indexed rank
+        }
+    }
+    // Score is lower than all entries
+    return leaderboard.length + 1;
+}
+
 function isHighScore(playerScore) {
     const leaderboard = getLeaderboard();
     debugLog(`🔍 isHighScore check: score=${playerScore}, leaderboard has ${leaderboard.length} entries`);
     if (leaderboard.length > 0) {
         debugLog(`🔍 Lowest score in leaderboard: ${leaderboard[leaderboard.length - 1].score}`);
     }
-    
-    // If leaderboard is empty or has less than 15 entries, it's definitely a high score
+
+    // If leaderboard is empty or has less than 10 entries, it's definitely a high score
     if (leaderboard.length === 0) {
         debugLog(`✅ High score detected: leaderboard is empty`);
         return true;
     }
-    
-    if (leaderboard.length < 15) {
-        debugLog(`✅ High score detected: leaderboard has only ${leaderboard.length} entries (need 15 for full board)`);
+
+    if (leaderboard.length < 10) {
+        debugLog(`✅ High score detected: leaderboard has only ${leaderboard.length} entries (need 10 for full board)`);
         return true;
     }
-    
-    // Check if score beats the lowest score in top 15
-    const lowestScore = leaderboard[Math.min(14, leaderboard.length - 1)].score;
+
+    // Check if score beats the lowest score in top 10
+    const lowestScore = leaderboard[Math.min(9, leaderboard.length - 1)].score;
     const isHigh = playerScore > lowestScore;
-    debugLog(`${isHigh ? '✅' : '❌'} High score check: ${playerScore} > ${lowestScore} = ${isHigh} (top 15 check)`);
+    debugLog(`${isHigh ? '✅' : '❌'} High score check: ${playerScore} > ${lowestScore} = ${isHigh} (top 10 check)`);
     return isHigh;
 }
 
@@ -735,42 +750,45 @@ function updateLeaderboardDisplay() {
 // ============================================================
 // THIS FUNCTION SHOWS THE HIGH SCORE NAME INPUT DIALOG
 // Modifying this will break the high score submission flow
-// Called by: gameOver() when score qualifies for leaderboard
+// Called by: gameOver() when score qualifies for leaderboard (top 10)
 // ============================================================
 function showNameInputDialog(playerScore) {
     debugLog(`📝 showNameInputDialog called with score: ${playerScore}`);
-    
+
+    const rank = getScoreRank(playerScore);
+    const rankSuffix = getRankSuffix(rank);
+
     // Create modal overlay
     const modal = document.createElement('div');
     modal.className = 'name-input-modal';
-    
+
     // Create dialog
     const dialog = document.createElement('div');
     dialog.className = 'name-input-dialog';
-    
+
     dialog.innerHTML = `
-        <div class="name-input-title">New High Score!</div>
-        <div class="name-input-score">${playerScore}</div>
+        <div class="name-input-title">${rank}${rankSuffix} Place!</div>
+        <div class="name-input-score">${playerScore.toLocaleString()}</div>
         <input type="text" class="name-input-field" placeholder="Enter your name" maxlength="18" autocomplete="off">
         <div class="name-input-buttons">
             <button class="name-input-btn primary">Save Score</button>
             <button class="name-input-btn secondary">Skip</button>
         </div>
     `;
-    
+
     modal.appendChild(dialog);
     document.body.appendChild(modal);
-    
+
     debugLog(`📝 Name input modal added to DOM. Modal classes: ${modal.className}`);
     debugLog(`📝 Modal style display: ${getComputedStyle(modal).display}`);
-    
+
     const nameInput = dialog.querySelector('.name-input-field');
     const saveBtn = dialog.querySelector('.primary');
     const skipBtn = dialog.querySelector('.secondary');
-    
+
     // Focus the input
     nameInput.focus();
-    
+
     // Handle save
     const handleSave = () => {
         const playerName = nameInput.value.trim() || 'Anonymous';
@@ -779,7 +797,7 @@ function showNameInputDialog(playerScore) {
         updateLeaderboardDisplay();
         document.body.removeChild(modal);
         debugLog(`📝 Score saved and modal closed`);
-        
+
         // Show PLAY AGAIN button after score is saved
         if (typeof window.PROTECTED_showPlayAgainButton === 'function') {
             debugLog(`📝 Using protected PLAY AGAIN button display`);
@@ -792,11 +810,11 @@ function showNameInputDialog(playerScore) {
             }
         }
     };
-    
+
     // Handle skip
     const handleSkip = () => {
         document.body.removeChild(modal);
-        
+
         // Show PLAY AGAIN button even when skipping
         if (typeof window.PROTECTED_showPlayAgainButton === 'function') {
             debugLog(`📝 Skip: Using protected PLAY AGAIN button display`);
@@ -809,7 +827,7 @@ function showNameInputDialog(playerScore) {
             }
         }
     };
-    
+
     // Event listeners
     saveBtn.addEventListener('click', handleSave);
     skipBtn.addEventListener('click', handleSkip);
@@ -820,6 +838,64 @@ function showNameInputDialog(playerScore) {
             handleSkip();
         }
     });
+}
+
+// Get ordinal suffix for rank (1st, 2nd, 3rd, 4th, etc.)
+function getRankSuffix(rank) {
+    if (rank >= 11 && rank <= 13) return 'th';
+    switch (rank % 10) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
+}
+
+// Show game over dialog for non-top-10 scores (no name entry)
+function showGameOverDialog(playerScore) {
+    debugLog(`📝 showGameOverDialog called with score: ${playerScore}`);
+
+    const rank = getScoreRank(playerScore);
+    const rankSuffix = getRankSuffix(rank);
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'name-input-modal';
+
+    // Create dialog
+    const dialog = document.createElement('div');
+    dialog.className = 'name-input-dialog';
+
+    dialog.innerHTML = `
+        <div class="name-input-title">Game Over</div>
+        <div class="name-input-score">${playerScore.toLocaleString()}</div>
+        <div class="name-input-rank" style="color: #888; font-size: 14px; margin-bottom: 20px;">You placed ${rank}${rankSuffix}</div>
+        <div class="name-input-buttons">
+            <button class="name-input-btn primary">Play Again</button>
+        </div>
+    `;
+
+    modal.appendChild(dialog);
+    document.body.appendChild(modal);
+
+    const playAgainBtn = dialog.querySelector('.primary');
+
+    // Handle play again
+    const handlePlayAgain = () => {
+        document.body.removeChild(modal);
+
+        // Show PLAY AGAIN button
+        if (typeof window.PROTECTED_showPlayAgainButton === 'function') {
+            window.PROTECTED_showPlayAgainButton();
+        } else {
+            if (startBtn) {
+                startBtn.textContent = 'PLAY AGAIN';
+                startBtn.style.display = 'block';
+            }
+        }
+    };
+
+    playAgainBtn.addEventListener('click', handlePlayAgain);
 }
 
 // Initialize leaderboard
@@ -5104,10 +5180,12 @@ function gameOver() {
         stopGame();
         
         if (isHighScore(finalScore)) {
-            debugLog(`🎉 Fallback: Showing name input dialog for high score: ${finalScore}`);
+            debugLog(`🎉 Fallback: Showing name input dialog for top 10 score: ${finalScore}`);
             showNameInputDialog(finalScore);
+        } else {
+            debugLog(`📊 Fallback: Showing game over dialog for non-top-10 score: ${finalScore}`);
+            showGameOverDialog(finalScore);
         }
-        // DEBUG mode removed - now only records top 15 scores
     }
     // ⚠️⚠️⚠️ END CRITICAL LEADERBOARD CODE ⚠️⚠️⚠️
     
