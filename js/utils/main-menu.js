@@ -788,7 +788,7 @@
                     justify-content: flex-start;
                 }
                 .menu-title-img {
-                    max-width: 180px; /* 20% larger than 150px */
+                    max-width: 360px; /* 200% of previous size */
                     margin-top: 8px;
                     margin-bottom: 10px;
                 }
@@ -816,7 +816,7 @@
                     justify-content: flex-start;
                 }
                 .menu-title-img {
-                    max-width: 144px; /* 20% larger than 120px */
+                    max-width: 288px; /* 200% of previous size */
                     margin-top: 5px;
                     margin-bottom: 8px;
                 }
