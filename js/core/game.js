@@ -5712,13 +5712,11 @@ async function startGame() {
     // audioEngine.startGlitchHopTrack();
     debugLog('🎵 Game audio disabled - using Audio Editor sequencer');
 
-    // Start drum layer system - loads config from localStorage based on game mode
-    // AWAIT this to ensure it's ready before game starts
+    // Initialize drum layer system (but don't start yet - wait until game is revealed)
     if (window.DrumLayerSystem) {
         try {
             await window.DrumLayerSystem.init(currentMode);
-            window.DrumLayerSystem.start();
-            debugLog(`🥁 Drum layer system started for mode: ${currentMode}`);
+            debugLog(`🥁 Drum layer system initialized for mode: ${currentMode}`);
         } catch (e) {
             debugWarn('Drum layer system failed to init:', e);
         }
@@ -5732,8 +5730,13 @@ async function startGame() {
     debugLog('🎨 Verifying block theme colors...');
     verifyBlockColorsAfterGeneration();
 
-    // NOW hide the mode loading screen - blocks are ready!
+    // NOW hide ALL loading screens - blocks are ready!
     debugLog('🎬 Blocks generated - revealing game...');
+
+    // Hide the initial loading screen (the one with the logo)
+    hideLoadingScreen();
+
+    // Hide mode-specific loading screen
     if (window.currentGameMode && window.currentGameMode.hideLoadingScreen) {
         window.currentGameMode.hideLoadingScreen();
     }
@@ -5748,6 +5751,12 @@ async function startGame() {
     if (modeLoadingScreen) {
         modeLoadingScreen.style.animation = 'fadeOut 0.3s ease-out forwards';
         setTimeout(() => modeLoadingScreen.remove(), 300);
+    }
+
+    // NOW start the audio - game is revealed!
+    if (window.DrumLayerSystem) {
+        window.DrumLayerSystem.start();
+        debugLog('🥁 Drum layer system started');
     }
 
     pauseBtn.style.display = 'block';
@@ -7276,7 +7285,7 @@ function waitForModeSystemThenStartGameLoop() {
         if (!gameLoopStarted) {
             gameLoopStarted = true;
             debugWarn('⚠️ Mode system timeout - starting game loop anyway');
-            hideLoadingScreen();
+            // DON'T hide loading screen here - wait for startGame() to generate blocks first
             coreGameLoop(performance.now());
         }
     }, 10000);
@@ -7289,7 +7298,7 @@ function waitForModeSystemThenStartGameLoop() {
             if (!gameLoopStarted) {
                 gameLoopStarted = true;
                 debugLog('✅ Mode system ready - starting game loop');
-                hideLoadingScreen();
+                // DON'T hide loading screen here - wait for startGame() to generate blocks first
                 coreGameLoop(performance.now());
             }
         } else {
