@@ -101,72 +101,41 @@ class GameModeTemplate {
     async initializeMode() {
         this.updateLoadingProgress('Initializing mode...', 0);
         this.runtimeState.active = true;
-        await this.delay(300); // Initial delay to ensure DOM is ready
-        
+        await this.delay(50); // Minimal delay for DOM
+
         // Step 1: Apply theme integration - CRITICAL for block colors
-        this.updateLoadingProgress('Loading theme...', 10);
+        this.updateLoadingProgress('Loading theme...', 20);
         this.applyThemeIntegration();
-        await this.delay(1500); // MUCH longer delay for theme application (was 800)
-        
-        // Step 2: Verify theme loaded properly
-        this.updateLoadingProgress('Verifying theme colors...', 25);
-        await this.verifyThemeLoaded(); // Verify theme is actually loaded
-        await this.delay(800); // Much longer verification delay (was 400)
-        
-        // Step 3: Apply base settings
-        this.updateLoadingProgress('Configuring settings...', 40);
+        await this.delay(100); // Brief delay for theme to apply
+
+        // Step 2: Apply base settings
+        this.updateLoadingProgress('Configuring...', 40);
         this.applyColorScheme();
         this.applyMechanics();
-        await this.delay(600); // Much longer delay (was 300)
-        
-        // Step 4: Audio and leaderboard
-        this.updateLoadingProgress('Setting up audio & leaderboard...', 55);
+        await this.delay(50);
+
+        // Step 3: Audio and leaderboard
+        this.updateLoadingProgress('Setting up...', 60);
         this.applyAudioSettings();
         this.setupLeaderboard();
-        await this.delay(500); // Longer delay (was 200)
-        
-        // Step 5: Activate special features
-        this.updateLoadingProgress('Activating features...', 70);
+        await this.delay(50);
+
+        // Step 4: Activate special features
+        this.updateLoadingProgress('Activating features...', 75);
         this.activateFeatures();
-        await this.delay(800); // Much longer delay for features (was 400)
-        
-        // Step 6: Apply custom styles and ensure they take effect
-        this.updateLoadingProgress('Applying styles...', 75);
+        await this.delay(50);
+
+        // Step 5: Apply custom styles
+        this.updateLoadingProgress('Applying styles...', 85);
         this.applyCustomStyles();
-        await this.delay(700); // Much longer delay (was 300)
-        
-        // Step 7: Wait for initial blocks to be generated (if game has started)
-        this.updateLoadingProgress('Waiting for game blocks...', 85);
-        const blocksFound = await this.waitForBlocksToSpawn();
-        
-        // Step 8: Verify blocks have correct colors (only if blocks exist)
-        if (blocksFound) {
-            this.updateLoadingProgress('Verifying block colors...', 90);
-            const colorsVerified = await this.verifyBlockColors();
-            if (!colorsVerified) {
-                this.updateLoadingProgress('❌ Block colors not loaded - cannot continue', 100);
-                await this.delay(2000);
-                throw new Error('Block colors failed to load properly. Mode activation cancelled.');
-            }
-            await this.delay(500); // Extra delay after block verification
-        } else {
-            this.updateLoadingProgress('Ensuring theme stability...', 90);
-            // Even without blocks, verify that theme colors are properly loaded
-            const themeColorsReady = await this.verifyThemeColorsWithoutBlocks();
-            if (!themeColorsReady) {
-                this.updateLoadingProgress('❌ Theme colors not loaded - cannot continue', 100);
-                await this.delay(2000);
-                throw new Error('Theme colors failed to load properly. Mode activation cancelled.');
-            }
-            await this.delay(1000); // Longer delay when no blocks - ensure theme is rock solid
-        }
-        
-        // Step 9: Final stabilization delay
-        this.updateLoadingProgress('Finalizing theme...', 95);
-        await this.delay(800); // Additional stabilization delay
-        
+        await this.delay(100);
+
+        // Step 6: Quick theme verification (non-blocking)
+        this.updateLoadingProgress('Verifying...', 95);
+        await this.verifyThemeLoaded();
+
         this.updateLoadingProgress('Ready!', 100);
-        await this.delay(800); // Longer "Ready!" display (was 600)
+        await this.delay(200); // Brief "Ready!" display
     }
     
     /**
@@ -928,38 +897,34 @@ class GameModeTemplate {
     }
     
     /**
-     * Verify theme is properly loaded - keep checking until colors are correct
+     * Verify theme is properly loaded - quick check with fast timeout
      */
     async verifyThemeLoaded() {
-        const maxAttempts = 50; // 10 seconds max (50 * 200ms)
+        const maxAttempts = 10; // 500ms max (10 * 50ms)
         let attempts = 0;
-        
+
         while (attempts < maxAttempts) {
             if (window.getThemeBlockColors) {
                 const hp1Colors = window.getThemeBlockColors('hp1', 'full');
                 const hp2Colors = window.getThemeBlockColors('hp2', 'full');
                 const hp3Colors = window.getThemeBlockColors('hp3', 'full');
-                
+
                 // Check that we have actual theme colors (not default grey)
-                const validColors = [hp1Colors, hp2Colors, hp3Colors].filter(color => 
+                const validColors = [hp1Colors, hp2Colors, hp3Colors].filter(color =>
                     color && color.fill && color.fill !== '#666666' && color.fill !== '#999999'
                 );
-                
+
                 if (validColors.length >= 3) {
-                    console.log(`✅ ${this.id} theme colors loaded:`, {
-                        hp1: hp1Colors?.fill,
-                        hp2: hp2Colors?.fill, 
-                        hp3: hp3Colors?.fill
-                    });
+                    console.log(`✅ ${this.id} theme colors loaded`);
                     return;
                 }
             }
-            
+
             attempts++;
-            await this.delay(200);
+            await this.delay(50);
         }
-        
-        console.warn(`⚠️ ${this.id} theme verification timeout - blocks may appear grey`);
+
+        console.warn(`⚠️ ${this.id} theme verification timeout - continuing anyway`);
     }
     
     /**
