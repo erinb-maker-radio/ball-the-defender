@@ -662,6 +662,20 @@ class GameModeTemplate {
                 if (modeId === 'ballGoBoom') modeColor = '#ff6600';
                 else if (modeId === 'iceFrost' || modeId === 'ice') modeColor = '#00c8ff';
 
+                // Create full-screen backdrop to hide everything during loading
+                const backdrop = document.createElement('div');
+                backdrop.id = 'modeLoadingBackdrop';
+                backdrop.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: #1a1a2e;
+                    z-index: 10000;
+                `;
+                document.body.appendChild(backdrop);
+
                 // Create a container for the zoom animation
                 const zoomContainer = document.createElement('div');
                 zoomContainer.id = 'modeZoomImage';
@@ -865,6 +879,14 @@ class GameModeTemplate {
      * Hide loading screen
      */
     hideLoadingScreen() {
+        // Handle backdrop if it exists
+        const backdrop = document.getElementById('modeLoadingBackdrop');
+        if (backdrop) {
+            backdrop.style.transition = 'opacity 0.3s ease';
+            backdrop.style.opacity = '0';
+            setTimeout(() => backdrop.remove(), 300);
+        }
+
         // Handle zoom image if it exists
         const zoomImg = document.getElementById('modeZoomImage');
         if (zoomImg) {

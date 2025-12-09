@@ -5741,6 +5741,12 @@ async function startGame() {
         window.currentGameMode.hideLoadingScreen();
     }
     // Also try to hide any leftover loading elements
+    const modeBackdrop = document.getElementById('modeLoadingBackdrop');
+    if (modeBackdrop) {
+        modeBackdrop.style.transition = 'opacity 0.3s ease';
+        modeBackdrop.style.opacity = '0';
+        setTimeout(() => modeBackdrop.remove(), 300);
+    }
     const modeZoomImg = document.getElementById('modeZoomImage');
     if (modeZoomImg) {
         modeZoomImg.style.transition = 'opacity 0.3s ease';
@@ -7285,7 +7291,7 @@ function waitForModeSystemThenStartGameLoop() {
         if (!gameLoopStarted) {
             gameLoopStarted = true;
             debugWarn('⚠️ Mode system timeout - starting game loop anyway');
-            // DON'T hide loading screen here - wait for startGame() to generate blocks first
+            hideLoadingScreen(); // Show the menu
             coreGameLoop(performance.now());
         }
     }, 10000);
@@ -7298,7 +7304,7 @@ function waitForModeSystemThenStartGameLoop() {
             if (!gameLoopStarted) {
                 gameLoopStarted = true;
                 debugLog('✅ Mode system ready - starting game loop');
-                // DON'T hide loading screen here - wait for startGame() to generate blocks first
+                hideLoadingScreen(); // Show the menu - mode's loading screen will take over when game starts
                 coreGameLoop(performance.now());
             }
         } else {
