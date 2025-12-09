@@ -83,7 +83,18 @@ body.orientation-landscape {
         margin: 5px 0;
     }
 
-    /* Geo panel mobile - more compact */
+    /* MOBILE: Hide geo panel to save space for leaderboard */
+    .geo-stats-panel,
+    #geoStatsContainer {
+        display: none !important;
+    }
+
+    /* MOBILE: Hide playtime header to save space */
+    .time-header {
+        display: none !important;
+    }
+
+    /* Geo panel mobile - more compact (hidden but keep for reference) */
     .geo-stats-panel {
         padding: 6px 8px;
         margin-top: 6px;
@@ -149,27 +160,15 @@ body.orientation-landscape {
         max-height: none;
     }
 
-    /* Geo panel landscape - compact sidebar */
-    .geo-stats-panel {
-        padding: 5px;
-        margin-top: 5px;
+    /* MOBILE LANDSCAPE: Hide geo panel to save space for leaderboard */
+    .geo-stats-panel,
+    #geoStatsContainer {
+        display: none !important;
     }
 
-    .geo-stats-header {
-        font-size: 0.65rem;
-    }
-
-    .geo-stat-item {
-        padding: 4px;
-        margin-bottom: 3px;
-    }
-
-    .geo-stat-value {
-        font-size: 0.65rem;
-    }
-
-    .geo-location-entry {
-        font-size: 0.55rem;
+    /* MOBILE LANDSCAPE: Hide playtime header to save space */
+    .time-header {
+        display: none !important;
     }
 }
 
