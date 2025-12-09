@@ -219,8 +219,18 @@
             :fullscreen,
             :-webkit-full-screen,
             :-moz-full-screen {
-                width: 100% !important;
-                height: 100% !important;
+                width: 100vw !important;
+                height: 100dvh !important; /* dynamic viewport height */
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            :fullscreen body,
+            :-webkit-full-screen body,
+            :-moz-full-screen body {
+                margin: 0 !important;
+                padding: 0 !important;
                 overflow: hidden !important;
             }
 
@@ -229,34 +239,39 @@
             :-moz-full-screen .game-layout {
                 flex-direction: row !important;
                 padding: 0 !important;
+                margin: 0 !important;
                 gap: 0 !important;
-                height: 100% !important;
-                width: 100% !important;
+                height: 100dvh !important;
+                width: 100vw !important;
                 overflow: hidden !important;
                 position: fixed !important;
                 top: 0 !important;
                 left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
             }
 
             :fullscreen .game-area,
             :-webkit-full-screen .game-area,
             :-moz-full-screen .game-area {
-                flex: 1 !important;
-                width: auto !important;
-                height: 100% !important;
+                width: 100vw !important;
+                height: 100dvh !important;
+                max-height: 100dvh !important;
                 padding: 0 !important;
+                margin: 0 !important;
                 overflow: hidden !important;
                 display: flex !important;
-                align-items: stretch !important;
+                align-items: center !important;
+                justify-content: center !important;
             }
 
             :fullscreen #gameCanvas,
             :-webkit-full-screen #gameCanvas,
             :-moz-full-screen #gameCanvas {
-                width: 100% !important;
+                max-width: 100vw !important;
+                max-height: 100dvh !important;
+                width: auto !important;
                 height: 100% !important;
-                max-height: none !important;
-                max-width: none !important;
                 border-radius: 0 !important;
                 object-fit: contain !important;
             }
@@ -264,17 +279,7 @@
             :fullscreen .game-sidebar,
             :-webkit-full-screen .game-sidebar,
             :-moz-full-screen .game-sidebar {
-                width: 160px !important;
-                min-width: 160px !important;
-                max-width: 160px !important;
-                height: 100% !important;
-                overflow-y: auto !important;
-                overflow-x: hidden !important;
-                padding: 5px !important;
-                font-size: 11px !important;
-                border-left: 2px solid #333 !important;
-                border-top: none !important;
-                flex-shrink: 0 !important;
+                display: none !important;
             }
 
             :fullscreen .arcade-leaderboard,
@@ -360,22 +365,18 @@
         const canvas = document.getElementById('gameCanvas');
         if (!canvas) return;
 
-        // Get the game area dimensions
-        const gameArea = document.querySelector('.game-area');
-        if (!gameArea) return;
-
         // Small delay to let CSS apply
         setTimeout(() => {
-            const rect = gameArea.getBoundingClientRect();
-            const availableWidth = rect.width;
-            const availableHeight = rect.height;
+            // Use screen dimensions for fullscreen
+            const availableWidth = window.innerWidth;
+            const availableHeight = window.innerHeight;
 
             // Maintain aspect ratio (roughly 4:5 for this game)
             const targetRatio = 4 / 5;
             let newWidth, newHeight;
 
             if (availableWidth / availableHeight > targetRatio) {
-                // Height is the constraint
+                // Height is the constraint - use full height
                 newHeight = availableHeight;
                 newWidth = newHeight * targetRatio;
             } else {
@@ -388,7 +389,11 @@
             canvas.width = Math.floor(newWidth);
             canvas.height = Math.floor(newHeight);
 
-            console.log(`📱 Canvas resized to ${canvas.width}x${canvas.height}`);
+            // Also set CSS dimensions explicitly
+            canvas.style.width = newWidth + 'px';
+            canvas.style.height = newHeight + 'px';
+
+            console.log(`📱 Canvas resized to ${canvas.width}x${canvas.height} (screen: ${availableWidth}x${availableHeight})`);
 
             // Trigger game resize if available
             if (window.resizeCanvas) {
