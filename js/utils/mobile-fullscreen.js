@@ -340,25 +340,38 @@
                 display: none !important;
             }
 
-            /* Fullscreen exit button */
+            /* Fullscreen exit button - Arcade Theme */
             .fullscreen-exit-btn {
                 position: fixed;
-                top: 10px;
-                right: 10px;
-                background: rgba(0, 0, 0, 0.5);
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
+                top: 8px;
+                right: 8px;
+                background: linear-gradient(135deg, rgba(10, 10, 35, 0.9) 0%, rgba(26, 26, 58, 0.9) 100%);
+                color: #64ffda;
+                border: 1px solid rgba(100, 255, 218, 0.4);
+                padding: 6px 10px;
+                border-radius: 4px;
+                font-size: 10px;
+                font-family: 'Segoe UI', Arial, sans-serif;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
                 cursor: pointer;
                 z-index: 10001;
-                opacity: 0.6;
-                transition: opacity 0.2s;
+                opacity: 0.7;
+                transition: all 0.2s ease;
+                box-shadow: 0 0 8px rgba(100, 255, 218, 0.2);
+                text-shadow: 0 0 4px rgba(100, 255, 218, 0.5);
             }
 
             .fullscreen-exit-btn:hover {
                 opacity: 1;
+                border-color: rgba(100, 255, 218, 0.8);
+                box-shadow: 0 0 12px rgba(100, 255, 218, 0.4);
+                background: linear-gradient(135deg, rgba(20, 20, 50, 0.95) 0%, rgba(40, 40, 70, 0.95) 100%);
+            }
+
+            .fullscreen-exit-btn:active {
+                transform: scale(0.95);
             }
         `;
         document.head.appendChild(style);
@@ -371,7 +384,7 @@
         const btn = document.createElement('button');
         btn.id = 'exitFullscreenBtn';
         btn.className = 'fullscreen-exit-btn';
-        btn.textContent = '✕ Exit';
+        btn.textContent = '◀ EXIT';
         btn.onclick = () => {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
