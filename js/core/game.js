@@ -5732,6 +5732,24 @@ async function startGame() {
     debugLog('🎨 Verifying block theme colors...');
     verifyBlockColorsAfterGeneration();
 
+    // NOW hide the mode loading screen - blocks are ready!
+    debugLog('🎬 Blocks generated - revealing game...');
+    if (window.currentGameMode && window.currentGameMode.hideLoadingScreen) {
+        window.currentGameMode.hideLoadingScreen();
+    }
+    // Also try to hide any leftover loading elements
+    const modeZoomImg = document.getElementById('modeZoomImage');
+    if (modeZoomImg) {
+        modeZoomImg.style.transition = 'opacity 0.3s ease';
+        modeZoomImg.style.opacity = '0';
+        setTimeout(() => modeZoomImg.remove(), 300);
+    }
+    const modeLoadingScreen = document.getElementById('modeLoadingScreen');
+    if (modeLoadingScreen) {
+        modeLoadingScreen.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => modeLoadingScreen.remove(), 300);
+    }
+
     pauseBtn.style.display = 'block';
     pauseBtn.textContent = 'PAUSE';
     pauseBtn.classList.remove('resume');

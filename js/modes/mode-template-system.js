@@ -76,18 +76,17 @@ class GameModeTemplate {
         }
         
         console.log(`🎮 Activating mode: ${this.name}`);
-        
+
         // Show loading screen immediately
         this.showLoadingScreen();
-        
+
         try {
             // Initialize mode step by step with loading progress
             await this.initializeMode();
-            
-            // Hide loading screen when complete
-            this.hideLoadingScreen();
-            
-            console.log(`✅ Mode ${this.name} fully loaded and ready`);
+
+            // DON'T hide loading screen here - game.js will hide it after blocks are generated
+            // This ensures blocks appear with the game field, not 3 seconds later
+            console.log(`✅ Mode ${this.name} initialized - waiting for game to generate blocks`);
         } catch (error) {
             console.error(`❌ Failed to load mode ${this.name}:`, error);
             this.hideLoadingScreen();
