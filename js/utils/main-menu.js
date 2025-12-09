@@ -775,34 +775,45 @@
                 }
             }
 
+            /* Mobile Landscape - Horizontal Layout */
             @media (max-height: 500px) {
                 .main-menu {
-                    align-items: flex-start;
-                    justify-content: center;
-                    padding: 5px 5px 5px 15px;
+                    align-items: stretch;
+                    justify-content: flex-start;
+                    padding: 10px;
                 }
                 .menu-content {
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: flex-start;
+                    width: 100%;
+                    height: 100%;
                     min-height: auto;
-                    padding: 5px;
-                    gap: 12px;
-                    justify-content: center;
-                    align-items: flex-start;
+                    padding: 0;
+                    gap: 20px;
                 }
                 .menu-title-img {
-                    max-width: 360px; /* 200% of previous size */
-                    margin-top: 0;
-                    margin-bottom: 10px;
-                    align-self: flex-start;
+                    max-width: none;
+                    width: auto;
+                    height: 40vh;
+                    max-height: 150px;
+                    flex-shrink: 0;
+                    margin: 0;
                 }
                 .mode-cards {
                     flex-direction: row;
-                    margin: 0 auto;
-                    gap: 12px;
+                    flex: 1;
+                    margin: 0;
+                    gap: 8px;
+                    height: 100%;
+                    align-items: center;
+                    justify-content: flex-start;
                 }
                 .mode-image-btn {
                     width: auto;
-                    height: calc(95vh - 80px); /* 95% of screen minus title space */
-                    max-height: 300px;
+                    height: calc(100vh - 30px);
+                    max-height: none;
+                    flex-shrink: 0;
                 }
                 .mode-image-btn img {
                     height: 100%;
@@ -814,37 +825,20 @@
             /* Ultra-short landscape (phones in landscape fullscreen) */
             @media (max-height: 400px) {
                 .main-menu {
-                    align-items: flex-start;
-                    justify-content: center;
-                    padding: 3px 3px 3px 15px;
+                    padding: 5px 10px;
                 }
                 .menu-content {
-                    min-height: auto;
-                    padding: 3px;
-                    gap: 10px;
-                    justify-content: center;
-                    align-items: flex-start;
+                    gap: 15px;
                 }
                 .menu-title-img {
-                    max-width: 288px; /* 200% of previous size */
-                    margin-top: 0;
-                    margin-bottom: 8px;
-                    align-self: flex-start;
+                    height: 35vh;
+                    max-height: 120px;
                 }
                 .mode-cards {
-                    flex-direction: row;
-                    margin: 0 auto;
-                    gap: 10px;
+                    gap: 6px;
                 }
                 .mode-image-btn {
-                    width: auto;
-                    height: calc(95vh - 60px); /* 95% of screen minus title space */
-                    max-height: 250px;
-                }
-                .mode-image-btn img {
-                    height: 100%;
-                    width: auto;
-                    object-fit: contain;
+                    height: calc(100vh - 20px);
                 }
             }
             
