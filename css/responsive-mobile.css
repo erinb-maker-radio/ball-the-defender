@@ -251,6 +251,51 @@ body.mobile-device .leaderboard-entry {
     .leaderboard-score {
         font-size: 10px !important;
     }
+    /* MOBILE: Shorter, uniform height buttons */
+    .game-controls {
+        padding: 4px !important;
+        gap: 3px !important;
+        margin-bottom: 4px !important;
+    }
+    .control-buttons-row {
+        gap: 3px !important;
+    }
+    .control-buttons-row button,
+    #startBtn,
+    #pauseBtn,
+    #endGameBtn {
+        padding: 4px 6px !important;
+        font-size: 9px !important;
+        height: 24px !important;
+        min-height: 24px !important;
+        max-height: 24px !important;
+        line-height: 1 !important;
+        border-radius: 4px !important;
+    }
+}
+
+/* MOBILE: Compact buttons for all mobile devices */
+body.mobile-device .game-controls {
+    padding: 4px !important;
+    gap: 3px !important;
+    margin-bottom: 4px !important;
+}
+
+body.mobile-device .control-buttons-row {
+    gap: 3px !important;
+}
+
+body.mobile-device .control-buttons-row button,
+body.mobile-device #startBtn,
+body.mobile-device #pauseBtn,
+body.mobile-device #endGameBtn {
+    padding: 4px 6px !important;
+    font-size: 9px !important;
+    height: 24px !important;
+    min-height: 24px !important;
+    max-height: 24px !important;
+    line-height: 1 !important;
+    border-radius: 4px !important;
 }
 
 /* Tablet Portrait (769px - 1024px) */
