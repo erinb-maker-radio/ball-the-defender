@@ -263,7 +263,8 @@ body.mobile-device .leaderboard-entry {
     .control-buttons-row button,
     #startBtn,
     #pauseBtn,
-    #endGameBtn {
+    #endGameBtn,
+    #returnToMenuBtn {
         padding: 4px 6px !important;
         font-size: 9px !important;
         height: 24px !important;
@@ -288,7 +289,8 @@ body.mobile-device .control-buttons-row {
 body.mobile-device .control-buttons-row button,
 body.mobile-device #startBtn,
 body.mobile-device #pauseBtn,
-body.mobile-device #endGameBtn {
+body.mobile-device #endGameBtn,
+body.mobile-device #returnToMenuBtn {
     padding: 4px 6px !important;
     font-size: 9px !important;
     height: 24px !important;
