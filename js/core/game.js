@@ -6406,6 +6406,20 @@ function gameLoop(currentTime) {
             if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
                 ball.speedX = -ball.speedX;
                 ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
+
+                // ANTI-HORIZONTAL-TRAP: If ball is moving too horizontally, add downward kick
+                const totalSpeed = Math.sqrt(ball.speedX * ball.speedX + ball.speedY * ball.speedY);
+                const minVerticalRatio = 0.15; // Ball must have at least 15% of its speed going vertical
+                if (Math.abs(ball.speedY) < totalSpeed * minVerticalRatio) {
+                    // Add a downward nudge (always down to help end the turn)
+                    const nudgeAmount = totalSpeed * 0.2;
+                    ball.speedY = ball.speedY > 0 ? nudgeAmount : -nudgeAmount;
+                    // If ball is above middle of screen, push it down; otherwise maintain direction
+                    if (ball.y < canvas.height * 0.5) {
+                        ball.speedY = Math.abs(ball.speedY); // Force downward
+                    }
+                }
+
                 createImpactParticles(ball.x, ball.y, colors.ball.primary);
                 if (SoundMixer.isEnabled('blockHit')) audioEngine.playPleasureSound('softImpact', 0.5);
                 // Removed hi-hat trigger on wall bounce
