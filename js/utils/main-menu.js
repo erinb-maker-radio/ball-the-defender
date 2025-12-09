@@ -800,7 +800,14 @@
                     gap: 12px;
                 }
                 .mode-image-btn {
-                    width: 156px; /* 30% larger than 120px */
+                    width: auto;
+                    height: calc(95vh - 80px); /* 95% of screen minus title space */
+                    max-height: 300px;
+                }
+                .mode-image-btn img {
+                    height: 100%;
+                    width: auto;
+                    object-fit: contain;
                 }
             }
 
@@ -830,7 +837,14 @@
                     gap: 10px;
                 }
                 .mode-image-btn {
-                    width: 130px; /* 30% larger than 100px */
+                    width: auto;
+                    height: calc(95vh - 60px); /* 95% of screen minus title space */
+                    max-height: 250px;
+                }
+                .mode-image-btn img {
+                    height: 100%;
+                    width: auto;
+                    object-fit: contain;
                 }
             }
             
