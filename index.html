@@ -239,12 +239,15 @@
                 </div>
             </div>
 
-            <!-- GEO TRACKING - Player Locations -->
-            <div id="geoStatsContainer" class="geo-stats-panel">
-                <div class="geo-stats-header">
+            <!-- GEO TRACKING - Player Locations (Collapsible) -->
+            <div id="geoStatsContainer" class="geo-stats-panel collapsed">
+                <div class="geo-stats-header" onclick="toggleGeoPanel()">
                     <span class="geo-icon">🌍</span> PLAYER LOCATIONS
+                    <span class="geo-toggle">▶</span>
                 </div>
-                <div class="geo-loading">Loading locations...</div>
+                <div class="geo-content">
+                    <div class="geo-loading">Loading locations...</div>
+                </div>
             </div>
             
             <!-- Game Controls -->
@@ -446,6 +449,25 @@
             window.volumeControl = new VolumeControl();
             initializeTimeDisplays();
             initializeBlocksDestroyedCounter();
+        });
+
+        // Geo panel toggle
+        function toggleGeoPanel() {
+            const panel = document.getElementById('geoStatsContainer');
+            if (panel) {
+                panel.classList.toggle('collapsed');
+                // Save preference
+                localStorage.setItem('geoPanel_collapsed', panel.classList.contains('collapsed'));
+            }
+        }
+
+        // Restore geo panel state on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const panel = document.getElementById('geoStatsContainer');
+            const isCollapsed = localStorage.getItem('geoPanel_collapsed');
+            if (panel && isCollapsed === 'false') {
+                panel.classList.remove('collapsed');
+            }
         });
 
         // Creative Digital Time Display System
@@ -893,25 +915,54 @@
         .geo-stats-panel {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
-            padding: 10px;
+            padding: 8px 10px;
             margin-top: 10px;
             border: 1px solid rgba(102, 126, 234, 0.2);
         }
 
         .geo-stats-header {
             color: #64ffda;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .geo-stats-header:hover {
+            color: #9efff0;
+        }
+
+        .geo-toggle {
+            margin-left: auto;
+            font-size: 0.7rem;
+            transition: transform 0.2s ease;
+        }
+
+        .geo-stats-panel:not(.collapsed) .geo-toggle {
+            transform: rotate(90deg);
+        }
+
+        .geo-content {
+            overflow: hidden;
+            max-height: 300px;
+            transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.2s ease;
+            margin-top: 8px;
+            opacity: 1;
+        }
+
+        .geo-stats-panel.collapsed .geo-content {
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
         }
 
         .geo-icon {
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .geo-loading {

@@ -243,13 +243,16 @@
         const geoContainer = document.getElementById('geoStatsContainer');
         if (!geoContainer) return;
 
-        const stats = geoStatsCache;
+        // Find or create the content div
+        let contentDiv = geoContainer.querySelector('.geo-content');
+        if (!contentDiv) {
+            contentDiv = document.createElement('div');
+            contentDiv.className = 'geo-content';
+            geoContainer.appendChild(contentDiv);
+        }
 
-        let html = `
-            <div class="geo-stats-header">
-                <span class="geo-icon">🌍</span> PLAYER LOCATIONS
-            </div>
-        `;
+        const stats = geoStatsCache;
+        let html = '';
 
         // Most Recent
         if (stats.mostRecent) {
@@ -304,7 +307,7 @@
             </div>
         `;
 
-        geoContainer.innerHTML = html;
+        contentDiv.innerHTML = html;
     }
 
     // Check if we should log this session
