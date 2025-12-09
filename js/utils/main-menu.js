@@ -777,20 +777,22 @@
 
             @media (max-height: 500px) {
                 .main-menu {
-                    align-items: center;
-                    justify-content: flex-start;
-                    padding: 25px 5px 5px 5px;
+                    align-items: flex-start;
+                    justify-content: center;
+                    padding: 5px 5px 5px 15px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 5px;
                     gap: 12px;
-                    justify-content: flex-start;
+                    justify-content: center;
+                    align-items: flex-start;
                 }
                 .menu-title-img {
                     max-width: 360px; /* 200% of previous size */
-                    margin-top: 8px;
+                    margin-top: 0;
                     margin-bottom: 10px;
+                    align-self: flex-start;
                 }
                 .mode-cards {
                     flex-direction: row;
@@ -805,20 +807,22 @@
             /* Ultra-short landscape (phones in landscape fullscreen) */
             @media (max-height: 400px) {
                 .main-menu {
-                    align-items: center;
-                    justify-content: flex-start;
-                    padding: 20px 3px 3px 3px;
+                    align-items: flex-start;
+                    justify-content: center;
+                    padding: 3px 3px 3px 15px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 3px;
                     gap: 10px;
-                    justify-content: flex-start;
+                    justify-content: center;
+                    align-items: flex-start;
                 }
                 .menu-title-img {
                     max-width: 288px; /* 200% of previous size */
-                    margin-top: 5px;
+                    margin-top: 0;
                     margin-bottom: 8px;
+                    align-self: flex-start;
                 }
                 .mode-cards {
                     flex-direction: row;
