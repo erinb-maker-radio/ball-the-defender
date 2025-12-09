@@ -371,8 +371,8 @@
             const availableWidth = window.innerWidth;
             const availableHeight = window.innerHeight;
 
-            // Maintain aspect ratio (roughly 4:5 for this game)
-            const targetRatio = 4 / 5;
+            // Game uses 4:3 aspect ratio (wider than tall)
+            const targetRatio = 4 / 3;
             let newWidth, newHeight;
 
             if (availableWidth / availableHeight > targetRatio) {
