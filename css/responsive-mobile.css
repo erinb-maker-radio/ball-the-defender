@@ -172,6 +172,28 @@ body.orientation-landscape {
     }
 }
 
+/* MOBILE FALLBACK - Hide geo panel and playtime on any small screen */
+/* Uses max-height to catch landscape phones regardless of width */
+@media screen and (max-height: 500px) {
+    .geo-stats-panel,
+    #geoStatsContainer {
+        display: none !important;
+    }
+    .time-header {
+        display: none !important;
+    }
+}
+
+/* Also hide when mobile-device class is present (JS detection) */
+body.mobile-device .geo-stats-panel,
+body.mobile-device #geoStatsContainer {
+    display: none !important;
+}
+
+body.mobile-device .time-header {
+    display: none !important;
+}
+
 /* Tablet Portrait (769px - 1024px) */
 @media screen and (min-width: 769px) and (max-width: 1024px) and (orientation: portrait) {
     .game-layout {
