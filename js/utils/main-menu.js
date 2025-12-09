@@ -777,50 +777,56 @@
 
             @media (max-height: 500px) {
                 .main-menu {
-                    align-items: flex-start;
-                    padding-top: 10px;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 5px;
                 }
                 .menu-content {
                     min-height: auto;
-                    padding: 10px;
-                    gap: 10px;
+                    padding: 5px;
+                    gap: 8px;
+                    justify-content: center;
                 }
                 .menu-title-img {
-                    max-width: 180px;
+                    max-width: 150px;
                     margin-top: 0;
+                    margin-bottom: 0;
                 }
                 .mode-cards {
                     flex-direction: row;
                     margin: 0 auto;
-                    gap: 10px;
+                    gap: 12px;
                 }
                 .mode-image-btn {
-                    width: 120px;
+                    width: 156px; /* 30% larger than 120px */
                 }
             }
 
             /* Ultra-short landscape (phones in landscape fullscreen) */
             @media (max-height: 400px) {
                 .main-menu {
-                    align-items: flex-start;
-                    padding-top: 5px;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 3px;
                 }
                 .menu-content {
                     min-height: auto;
-                    padding: 5px;
+                    padding: 3px;
                     gap: 5px;
+                    justify-content: center;
                 }
                 .menu-title-img {
-                    max-width: 140px;
+                    max-width: 120px;
                     margin-top: 0;
+                    margin-bottom: 0;
                 }
                 .mode-cards {
                     flex-direction: row;
                     margin: 0 auto;
-                    gap: 8px;
+                    gap: 10px;
                 }
                 .mode-image-btn {
-                    width: 100px;
+                    width: 130px; /* 30% larger than 100px */
                 }
             }
             
