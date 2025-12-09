@@ -432,76 +432,16 @@ function initializeDOMElements() {
     deltaMonitorElement = document.getElementById('deltaMonitor');
     ballSpeedMonitorElement = document.getElementById('ballSpeedMonitor');
     
-    // DYNAMIC CANVAS: Fill maximum available space with real-time responsiveness
-    // Available space: window.innerWidth - (320px sidebar + minimal margins)
-    const availableWidth = window.innerWidth - 330; // Sidebar + 10px margin
-    const availableHeight = window.innerHeight - 20; // Minimal top/bottom margin
+    // FIXED CANVAS SIZE: Game world is always 800x600 for consistent difficulty
+    // CSS will scale the display to fit the screen while maintaining aspect ratio
+    canvas.width = GAME_WIDTH;
+    canvas.height = GAME_HEIGHT;
+
+    debugLog(`Canvas initialized: ${canvas.width}x${canvas.height} (fixed game world)`);
     
-    // Target 4:3 aspect ratio but maximize space usage
-    const targetAspectRatio = 4/3;
-    let gameWidth, gameHeight;
-    
-    // Calculate dimensions to use maximum available space (99% utilization)
-    if (availableWidth / availableHeight > targetAspectRatio) {
-        // Limited by height - use 99% of available height
-        gameHeight = Math.floor(availableHeight * 0.99);
-        gameWidth = Math.floor(gameHeight * targetAspectRatio);
-    } else {
-        // Limited by width - use 99% of available width
-        gameWidth = Math.floor(availableWidth * 0.99);
-        gameHeight = Math.floor(gameWidth / targetAspectRatio);
-    }
-    
-    // Ensure reasonable size for good performance (reduced max size significantly)
-    gameWidth = Math.max(640, Math.min(gameWidth, 1000)); // Min 640px, max 1000px width (was 1600px)
-    gameHeight = Math.max(480, Math.min(gameHeight, 750)); // Min 480px, max 750px height (was 1200px)
-    
-    // Performance mode: Use smaller canvas on mobile or if performance issues detected
-    if (window.PERFORMANCE_MODE === 'mobile' || window.currentPerformanceMode === 'low' || window.currentPerformanceMode === 'potato') {
-        gameWidth = Math.min(gameWidth, 800); // Max 800px for performance mode
-        gameHeight = Math.min(gameHeight, 600); // Max 600px for performance mode
-        debugLog('📱 Performance mode active: Reduced canvas size for better FPS');
-    }
-    
-    canvas.width = gameWidth;
-    canvas.height = gameHeight;
-    
-    debugLog(`Canvas initialized: ${canvas.width}x${canvas.height}`);
-    
-    // Add dynamic resize listener for responsive canvas
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            // Recalculate canvas size on window resize
-            const newAvailableWidth = window.innerWidth - 330;
-            const newAvailableHeight = window.innerHeight - 20;
-            
-            let newGameWidth, newGameHeight;
-            if (newAvailableWidth / newAvailableHeight > targetAspectRatio) {
-                newGameHeight = Math.floor(newAvailableHeight * 0.99);
-                newGameWidth = Math.floor(newGameHeight * targetAspectRatio);
-            } else {
-                newGameWidth = Math.floor(newAvailableWidth * 0.99);
-                newGameHeight = Math.floor(newGameWidth / targetAspectRatio);
-            }
-            
-            // Apply size constraints
-            newGameWidth = Math.max(640, Math.min(newGameWidth, 1600));
-            newGameHeight = Math.max(480, Math.min(newGameHeight, 1200));
-            
-            // Only resize if significantly different (avoid micro-adjustments)
-            if (Math.abs(canvas.width - newGameWidth) > 10 || Math.abs(canvas.height - newGameHeight) > 10) {
-                canvas.width = newGameWidth;
-                canvas.height = newGameHeight;
-                debugLog(`Canvas resized: ${canvas.width}x${canvas.height}`);
-                
-                // Reinitialize game constants that depend on canvas size
-                initializeGameConstants();
-            }
-        }, 250); // Debounce resize events
-    });
-    
+    // Canvas is fixed at 800x600 - no resize needed
+    // CSS handles scaling the display to fit the screen
+
     // Initialize the clean architecture system
     initializeCleanArchitecture();
     
@@ -946,9 +886,14 @@ loadOnlineLeaderboard().then(() => {
     debugWarn('🏆 Leaderboard initialization failed, using fallback');
 });
 
-// These will be set after canvas is initialized
-let BALL_START_X;
-let BALL_START_Y;
+// FIXED GAME WORLD SIZE - All game logic uses these constants
+// This ensures consistent difficulty across all screen sizes
+const GAME_WIDTH = 800;   // Fixed logical width
+const GAME_HEIGHT = 600;  // Fixed logical height (4:3 aspect ratio)
+
+// These are now FIXED values based on GAME_WIDTH/GAME_HEIGHT
+const BALL_START_X = GAME_WIDTH / 2;
+const BALL_START_Y = GAME_HEIGHT - 20;
 
 const balls = [];
 window.balls = balls;  // Expose for detonator system
@@ -956,19 +901,19 @@ const blocks = [];
 window.blocks = blocks;  // Expose for detonator system
 const powerups = [];
 const BLOCKS_PER_ROW = 20; // Double the blocks with half width
-let BLOCK_WIDTH;
+const BLOCK_WIDTH = Math.floor((GAME_WIDTH - 60) / BLOCKS_PER_ROW);  // Now fixed: 37px
 const BLOCK_HEIGHT = 30;
 const BLOCK_PADDING = 6;
 const BLOCK_START_Y = 40; // Start blocks closer to top for more vertical space
-let BLOCK_START_X;
+const BLOCK_START_X = (GAME_WIDTH - (BLOCKS_PER_ROW * BLOCK_WIDTH)) / 2;  // Now fixed
 
-// Function to initialize game constants that depend on canvas
+// Function to initialize game constants - now just sets canvas to fixed size
 function initializeGameConstants() {
     if (!canvas) return;
-    BALL_START_X = canvas.width / 2;
-    BALL_START_Y = canvas.height - 20;
-    BLOCK_WIDTH = Math.floor((canvas.width - 60) / BLOCKS_PER_ROW);
-    BLOCK_START_X = (canvas.width - (BLOCKS_PER_ROW * BLOCK_WIDTH)) / 2;
+    // Set canvas to fixed game world size - CSS will scale the display
+    canvas.width = GAME_WIDTH;
+    canvas.height = GAME_HEIGHT;
+    debugLog(`Canvas set to fixed size: ${GAME_WIDTH}x${GAME_HEIGHT}`);
 }
 
 let isAiming = false;
@@ -5276,33 +5221,42 @@ function setupEventListeners() {
     }
     
     await audioEngine.initialize();
-    
+
+    // Convert display coordinates to game coordinates (for scaled canvas)
     const rect = canvas.getBoundingClientRect();
+    const scaleX = GAME_WIDTH / rect.width;
+    const scaleY = GAME_HEIGHT / rect.height;
     aimStartX = nextBallStartX;  // Use the remembered position from last turn
     aimStartY = BALL_START_Y;
-    aimEndX = e.clientX - rect.left;
-    aimEndY = e.clientY - rect.top;
+    aimEndX = (e.clientX - rect.left) * scaleX;
+    aimEndY = (e.clientY - rect.top) * scaleY;
     isAiming = true;
-    
+
     debugLog(`Aiming from position x=${Math.floor(aimStartX)} (where last ball hit)`);
-    
+
     audioEngine.playUIClick();
 });
 
 canvas.addEventListener('mousemove', (e) => {
     if (!isAiming) return;
-    
+
+    // Convert display coordinates to game coordinates
     const rect = canvas.getBoundingClientRect();
-    aimEndX = e.clientX - rect.left;
-    aimEndY = e.clientY - rect.top;
+    const scaleX = GAME_WIDTH / rect.width;
+    const scaleY = GAME_HEIGHT / rect.height;
+    aimEndX = (e.clientX - rect.left) * scaleX;
+    aimEndY = (e.clientY - rect.top) * scaleY;
 });
 
 canvas.addEventListener('mouseup', (e) => {
     if (!isAiming) return;
 
+    // Convert display coordinates to game coordinates
     const rect = canvas.getBoundingClientRect();
-    aimEndX = e.clientX - rect.left;
-    aimEndY = e.clientY - rect.top;
+    const scaleX = GAME_WIDTH / rect.width;
+    const scaleY = GAME_HEIGHT / rect.height;
+    aimEndX = (e.clientX - rect.left) * scaleX;
+    aimEndY = (e.clientY - rect.top) * scaleY;
 
     // Launch ball
     launchBall();
@@ -5346,11 +5300,14 @@ canvas.addEventListener('touchstart', async (e) => {
 
     await audioEngine.initialize();
 
+    // Convert display coordinates to game coordinates (for scaled canvas)
     const rect = canvas.getBoundingClientRect();
+    const scaleX = GAME_WIDTH / rect.width;
+    const scaleY = GAME_HEIGHT / rect.height;
     aimStartX = nextBallStartX;
     aimStartY = BALL_START_Y;
-    aimEndX = touch.clientX - rect.left;
-    aimEndY = touch.clientY - rect.top;
+    aimEndX = (touch.clientX - rect.left) * scaleX;
+    aimEndY = (touch.clientY - rect.top) * scaleY;
     isAiming = true;
 
     debugLog(`Touch aiming from x=${Math.floor(aimStartX)}`);
@@ -5361,10 +5318,13 @@ canvas.addEventListener('touchmove', (e) => {
     if (!isAiming) return;
     e.preventDefault();
 
+    // Convert display coordinates to game coordinates
     const touch = e.touches[0];
     const rect = canvas.getBoundingClientRect();
-    aimEndX = touch.clientX - rect.left;
-    aimEndY = touch.clientY - rect.top;
+    const scaleX = GAME_WIDTH / rect.width;
+    const scaleY = GAME_HEIGHT / rect.height;
+    aimEndX = (touch.clientX - rect.left) * scaleX;
+    aimEndY = (touch.clientY - rect.top) * scaleY;
 }, { passive: false });
 
 canvas.addEventListener('touchend', (e) => {
@@ -6030,7 +5990,7 @@ function generateLevel() {
     // Place a single +1 ball powerup randomly within the initial 6 rows
     const powerupRow = Math.floor(Math.random() * rows); // Random row 0-5
     const powerupCol = Math.random(); // Random position across width
-    const powerupX = 50 + powerupCol * (canvas.width - 100);
+    const powerupX = 50 + powerupCol * (GAME_WIDTH - 100);
     const powerupY = BLOCK_START_Y + powerupRow * BLOCK_HEIGHT + BLOCK_HEIGHT / 2;
     
     // Add the initial +1 ball powerup
@@ -6107,7 +6067,7 @@ function advanceBlocks() {
     });
     
     // Check if any blocks reached the danger line (game over condition)
-    const dangerY = canvas.height - 50; // Danger line very close to bottom for maximum play space
+    const dangerY = GAME_HEIGHT - 50; // Danger line very close to bottom for maximum play space
     const blocksInDanger = blocks.filter(block => !block.destroyed && block.y >= dangerY);
     
     if (blocksInDanger.length > 0) {
@@ -6257,7 +6217,7 @@ function addSingleBallPowerup() {
     
     while (maxAttempts > 0 && !placed) {
         // Simple +1 ball powerup spawner - try random positions
-        const x = 50 + Math.random() * (canvas.width - 100);
+        const x = 50 + Math.random() * (GAME_WIDTH - 100);
         const y = BLOCK_START_Y + Math.random() * 200; // Within first few rows area
         
         // Make sure it doesn't overlap with existing blocks
@@ -6291,7 +6251,7 @@ function addSingleBallPowerup() {
     
     if (!placed) {
         // If we couldn't place it in open space, place it in a gap between blocks
-        const centerX = canvas.width / 2;
+        const centerX = GAME_WIDTH / 2;
         const safeY = BLOCK_START_Y - 30; // Place above blocks
         
         powerups.push({
@@ -6349,12 +6309,12 @@ function levelComplete() {
 function showLevelTransition() {
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = 'rgba(100, 255, 218, 0.1)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+    ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
     ctx.fillStyle = colors.ui.accent;
     ctx.font = 'bold 32px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(`Level ${level}`, canvas.width / 2, canvas.height / 2);
+    ctx.fillText(`Level ${level}`, GAME_WIDTH / 2, GAME_HEIGHT / 2);
 }
 
 // Removed old spawnPowerup function - using addSingleBallPowerup only
@@ -6482,9 +6442,9 @@ function gameLoop(currentTime) {
             ball.y += ball.speedY * deltaMultiplier;
             
             // Enhanced wall collisions
-            if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= canvas.width) {
+            if (ball.x - ball.radius <= 0 || ball.x + ball.radius >= GAME_WIDTH) {
                 ball.speedX = -ball.speedX;
-                ball.x = Math.max(ball.radius, Math.min(canvas.width - ball.radius, ball.x));
+                ball.x = Math.max(ball.radius, Math.min(GAME_WIDTH - ball.radius, ball.x));
 
                 // ANTI-HORIZONTAL-TRAP: If ball is moving too horizontally, add downward kick
                 const totalSpeed = Math.sqrt(ball.speedX * ball.speedX + ball.speedY * ball.speedY);
@@ -6494,7 +6454,7 @@ function gameLoop(currentTime) {
                     const nudgeAmount = totalSpeed * 0.2;
                     ball.speedY = ball.speedY > 0 ? nudgeAmount : -nudgeAmount;
                     // If ball is above middle of screen, push it down; otherwise maintain direction
-                    if (ball.y < canvas.height * 0.5) {
+                    if (ball.y < GAME_HEIGHT * 0.5) {
                         ball.speedY = Math.abs(ball.speedY); // Force downward
                     }
                 }
@@ -6514,7 +6474,7 @@ function gameLoop(currentTime) {
             }
             
             // Bottom boundary - ball is lost
-            if (ball.y + ball.radius >= canvas.height) {
+            if (ball.y + ball.radius >= GAME_HEIGHT) {
                 // Remember where the first ball of this turn hit the bottom
                 if (firstBallOfTurn) {
                     nextBallStartX = ball.x;
@@ -6675,7 +6635,7 @@ function gameLoop(currentTime) {
                             for (let i = 0; i < spawns; i++) {
                                 const offsetX = (Math.random() - 0.5) * BLOCK_WIDTH * 3;
                                 const offsetY = (Math.random() - 0.5) * BLOCK_HEIGHT * 2;
-                                const newX = Math.max(0, Math.min(canvas.width - BLOCK_WIDTH, block.x + offsetX));
+                                const newX = Math.max(0, Math.min(GAME_WIDTH - BLOCK_WIDTH, block.x + offsetX));
                                 const newY = block.y + offsetY;
                                 
                                 // Don't spawn if position is occupied
@@ -6841,7 +6801,7 @@ function gameLoop(currentTime) {
     });
     
     // Check if any blocks reached danger line during continuous movement
-    const gameLoopDangerY = canvas.height - 50;
+    const gameLoopDangerY = GAME_HEIGHT - 50;
     const gameLoopBlocksInDanger = blocks.filter(block => !block.destroyed && block.y >= gameLoopDangerY);
     if (gameLoopBlocksInDanger.length > 0) {
         debugLog('🚨 Continuous movement: Blocks reached danger line - Game Over!');
@@ -7157,7 +7117,7 @@ function gameLoop(currentTime) {
             ctx.shadowBlur = 0;
             
             // Remove if off screen
-            if (powerup.y > canvas.height + powerup.radius) {
+            if (powerup.y > GAME_HEIGHT + powerup.radius) {
                 powerup.collected = true;
             }
         }
@@ -7174,11 +7134,11 @@ function gameLoop(currentTime) {
     drawParticles();
     
     // Draw pulsing neon danger line
-    const visualDangerY = canvas.height - 50;
+    const visualDangerY = GAME_HEIGHT - 50;
     const pulseIntensity = (Math.sin(Date.now() * 0.01) + 1) / 2; // 0 to 1
     const lineAlpha = 0.3 + pulseIntensity * 0.4; // 0.3 to 0.7
     const glowIntensity = 10 + pulseIntensity * 20; // 10 to 30
-    
+
     ctx.strokeStyle = `rgba(255, 0, 100, ${lineAlpha})`;
     ctx.shadowColor = '#ff0064';
     ctx.shadowBlur = glowIntensity;
@@ -7186,7 +7146,7 @@ function gameLoop(currentTime) {
     ctx.setLineDash([10, 5]); // Dashed line
     ctx.beginPath();
     ctx.moveTo(0, visualDangerY);
-    ctx.lineTo(canvas.width, visualDangerY);
+    ctx.lineTo(GAME_WIDTH, visualDangerY);
     ctx.stroke();
     ctx.setLineDash([]); // Reset line dash
     ctx.shadowBlur = 0;
@@ -7323,7 +7283,7 @@ function gameLoop(currentTime) {
         ctx.textBaseline = 'middle';
         ctx.shadowColor = '#00ffff';
         ctx.shadowBlur = 20;
-        ctx.fillText('CLICK TO START', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('CLICK TO START', GAME_WIDTH / 2, GAME_HEIGHT / 2);
         ctx.shadowBlur = 0;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'alphabetic';
@@ -7345,7 +7305,7 @@ function gameLoop(currentTime) {
         ctx.textBaseline = 'middle';
         ctx.shadowColor = '#00ffff';
         ctx.shadowBlur = 20;
-        ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+        ctx.fillText('PAUSED', GAME_WIDTH / 2, GAME_HEIGHT / 2);
         ctx.shadowBlur = 0;
         requestAnimationFrame(coreGameLoop); // Keep drawing paused state
     } else if (gameState === 'idle') {

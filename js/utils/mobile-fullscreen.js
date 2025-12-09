@@ -387,7 +387,7 @@
         if (btn) btn.remove();
     }
 
-    // Resize canvas to fit fullscreen
+    // Scale canvas display to fit fullscreen (canvas resolution stays fixed at 800x600)
     function resizeCanvasForFullscreen() {
         const canvas = document.getElementById('gameCanvas');
         if (!canvas) return;
@@ -398,29 +398,26 @@
             const availableWidth = window.innerWidth;
             const availableHeight = window.innerHeight;
 
-            // Game uses 4:3 aspect ratio (wider than tall)
+            // Game uses 4:3 aspect ratio (800x600 = fixed game world)
             const targetRatio = 4 / 3;
-            let newWidth, newHeight;
+            let displayWidth, displayHeight;
 
             if (availableWidth / availableHeight > targetRatio) {
                 // Height is the constraint - use full height
-                newHeight = availableHeight;
-                newWidth = newHeight * targetRatio;
+                displayHeight = availableHeight;
+                displayWidth = displayHeight * targetRatio;
             } else {
                 // Width is the constraint
-                newWidth = availableWidth;
-                newHeight = newWidth / targetRatio;
+                displayWidth = availableWidth;
+                displayHeight = displayWidth / targetRatio;
             }
 
-            // Update canvas internal resolution
-            canvas.width = Math.floor(newWidth);
-            canvas.height = Math.floor(newHeight);
+            // DO NOT change canvas.width/height - game world is fixed at 800x600
+            // Only change CSS display size to scale the fixed game world
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
 
-            // Also set CSS dimensions explicitly
-            canvas.style.width = newWidth + 'px';
-            canvas.style.height = newHeight + 'px';
-
-            console.log(`📱 Canvas resized to ${canvas.width}x${canvas.height} (screen: ${availableWidth}x${availableHeight})`);
+            console.log(`📱 Canvas display scaled to ${displayWidth}x${displayHeight} (internal: ${canvas.width}x${canvas.height})`);
 
             // Trigger game resize if available
             if (window.resizeCanvas) {
