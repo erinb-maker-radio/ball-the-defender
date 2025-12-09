@@ -5299,15 +5299,94 @@ canvas.addEventListener('mousemove', (e) => {
 
 canvas.addEventListener('mouseup', (e) => {
     if (!isAiming) return;
-    
+
     const rect = canvas.getBoundingClientRect();
     aimEndX = e.clientX - rect.left;
     aimEndY = e.clientY - rect.top;
-    
+
     // Launch ball
     launchBall();
     isAiming = false;
 });
+
+// ============================================
+// TOUCH EVENT HANDLERS FOR MOBILE
+// ============================================
+
+canvas.addEventListener('touchstart', async (e) => {
+    e.preventDefault(); // Prevent scrolling
+    const touch = e.touches[0];
+
+    debugLog(`Touch start - Game state: ${gameState}, Turn in progress: ${turnInProgress}`);
+
+    // Start game on first touch if idle
+    if (gameState === 'idle') {
+        await audioEngine.initialize();
+        audioEngine.playUIClick();
+        startGame();
+        return;
+    }
+
+    // Only allow aiming if game is playing
+    if (gameState !== 'playing') {
+        debugLog('Cannot aim: game not playing');
+        return;
+    }
+
+    // Sync with window value (for detonator system)
+    if (window.turnInProgress !== undefined) {
+        turnInProgress = window.turnInProgress;
+    }
+
+    // Enforce turn-based system
+    if (turnInProgress) {
+        debugLog('❌ Cannot shoot - turn in progress');
+        return;
+    }
+
+    await audioEngine.initialize();
+
+    const rect = canvas.getBoundingClientRect();
+    aimStartX = nextBallStartX;
+    aimStartY = BALL_START_Y;
+    aimEndX = touch.clientX - rect.left;
+    aimEndY = touch.clientY - rect.top;
+    isAiming = true;
+
+    debugLog(`Touch aiming from x=${Math.floor(aimStartX)}`);
+    audioEngine.playUIClick();
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+    if (!isAiming) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    aimEndX = touch.clientX - rect.left;
+    aimEndY = touch.clientY - rect.top;
+}, { passive: false });
+
+canvas.addEventListener('touchend', (e) => {
+    if (!isAiming) return;
+    e.preventDefault();
+
+    // Use last known position (touchend doesn't have touches array)
+    // aimEndX and aimEndY are already set from touchmove
+
+    debugLog(`Touch end - launching ball`);
+
+    // Launch ball
+    launchBall();
+    isAiming = false;
+}, { passive: false });
+
+// Prevent default touch behaviors on canvas
+canvas.addEventListener('touchcancel', (e) => {
+    isAiming = false;
+});
+
+// ============================================
 
 function launchBall() {
     // Start turn
