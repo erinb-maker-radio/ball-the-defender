@@ -213,7 +213,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="time-counter global">
                     <div class="time-label">Global Time</div>
                     <div class="time-display-compact" id="globalTimeDigits">
@@ -237,6 +237,14 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- GEO TRACKING - Player Locations -->
+            <div id="geoStatsContainer" class="geo-stats-panel">
+                <div class="geo-stats-header">
+                    <span class="geo-icon">🌍</span> PLAYER LOCATIONS
+                </div>
+                <div class="geo-loading">Loading locations...</div>
             </div>
             
             <!-- Game Controls -->
@@ -294,6 +302,9 @@
 
     <!-- Adaptive Drum Layer System -->
     <script src="js/audio/drum-layer-system.js"></script>
+
+    <!-- Geo Tracking System -->
+    <script src="js/utils/geo-tracking.js"></script>
 
     <!-- Volume Control -->
     <script>
@@ -876,6 +887,103 @@
             .sculpt-sections {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Geo Tracking Styles */
+        .geo-stats-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .geo-stats-header {
+            color: #64ffda;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .geo-icon {
+            font-size: 1rem;
+        }
+
+        .geo-loading {
+            color: #666;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+
+        .geo-stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 8px;
+            margin-bottom: 6px;
+        }
+
+        .geo-stat-item.farthest {
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .geo-stat-label {
+            color: #888;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .geo-stat-value {
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .geo-stat-detail {
+            color: #667eea;
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+
+        .geo-locations-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 6px;
+        }
+
+        .geo-location-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 6px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+
+        .geo-location-name {
+            color: #ccc;
+        }
+
+        .geo-location-distance {
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        .geo-summary {
+            color: #666;
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 
