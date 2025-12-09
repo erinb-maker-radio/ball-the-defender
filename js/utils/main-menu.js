@@ -778,19 +778,19 @@
             @media (max-height: 500px) {
                 .main-menu {
                     align-items: center;
-                    justify-content: center;
-                    padding: 5px;
+                    justify-content: flex-start;
+                    padding: 10px 5px 5px 5px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 5px;
                     gap: 8px;
-                    justify-content: center;
+                    justify-content: flex-start;
                 }
                 .menu-title-img {
                     max-width: 150px;
-                    margin-top: 0;
-                    margin-bottom: 0;
+                    margin-top: 5px;
+                    margin-bottom: 5px;
                 }
                 .mode-cards {
                     flex-direction: row;
@@ -806,19 +806,19 @@
             @media (max-height: 400px) {
                 .main-menu {
                     align-items: center;
-                    justify-content: center;
-                    padding: 3px;
+                    justify-content: flex-start;
+                    padding: 8px 3px 3px 3px;
                 }
                 .menu-content {
                     min-height: auto;
                     padding: 3px;
                     gap: 5px;
-                    justify-content: center;
+                    justify-content: flex-start;
                 }
                 .menu-title-img {
                     max-width: 120px;
-                    margin-top: 0;
-                    margin-bottom: 0;
+                    margin-top: 3px;
+                    margin-bottom: 3px;
                 }
                 .mode-cards {
                     flex-direction: row;
