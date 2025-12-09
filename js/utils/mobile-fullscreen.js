@@ -154,10 +154,8 @@
         });
     }
 
-    // Show rotate device message if in portrait
+    // Show rotate device message if in portrait - ALWAYS on mobile, not just fullscreen
     function checkOrientation() {
-        if (!isFullscreen()) return;
-
         const isPortrait = window.innerHeight > window.innerWidth;
         let rotateOverlay = document.getElementById('rotateDeviceOverlay');
 
@@ -167,7 +165,9 @@
                 rotateOverlay.id = 'rotateDeviceOverlay';
                 rotateOverlay.innerHTML = `
                     <div class="rotate-icon">📱↻</div>
-                    <div class="rotate-text">Rotate your device</div>
+                    <div class="rotate-text">Rotate your device to landscape</div>
+                    <div class="rotate-subtext">This game is designed for landscape mode</div>
+                    <button class="rotate-fullscreen-btn">🎮 TAP TO GO FULLSCREEN</button>
                 `;
                 rotateOverlay.style.cssText = `
                     position: fixed;
@@ -189,23 +189,50 @@
                 icon.style.cssText = `font-size: 80px; animation: rotateAnim 2s ease-in-out infinite;`;
 
                 const text = rotateOverlay.querySelector('.rotate-text');
-                text.style.cssText = `font-size: 20px; margin-top: 20px; opacity: 0.8;`;
+                text.style.cssText = `font-size: 22px; margin-top: 20px; font-weight: bold;`;
+
+                const subtext = rotateOverlay.querySelector('.rotate-subtext');
+                subtext.style.cssText = `font-size: 14px; margin-top: 10px; opacity: 0.7;`;
+
+                const btn = rotateOverlay.querySelector('.rotate-fullscreen-btn');
+                btn.style.cssText = `
+                    background: linear-gradient(135deg, #667eea, #764ba2);
+                    border: none;
+                    color: white;
+                    padding: 15px 30px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    border-radius: 10px;
+                    cursor: pointer;
+                    margin-top: 30px;
+                `;
+                btn.addEventListener('click', () => {
+                    requestFullscreen();
+                    lockLandscape();
+                });
 
                 // Add animation keyframes
-                const style = document.createElement('style');
-                style.textContent = `
-                    @keyframes rotateAnim {
-                        0%, 100% { transform: rotate(0deg); }
-                        50% { transform: rotate(90deg); }
-                    }
-                `;
-                document.head.appendChild(style);
+                if (!document.getElementById('rotateAnimStyle')) {
+                    const style = document.createElement('style');
+                    style.id = 'rotateAnimStyle';
+                    style.textContent = `
+                        @keyframes rotateAnim {
+                            0%, 100% { transform: rotate(0deg); }
+                            50% { transform: rotate(90deg); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
 
                 document.body.appendChild(rotateOverlay);
             }
         } else {
             if (rotateOverlay) {
                 rotateOverlay.remove();
+            }
+            // Re-lock landscape when back in landscape
+            if (isFullscreen()) {
+                lockLandscape();
             }
         }
     }
@@ -444,9 +471,15 @@
     function init() {
         setupFullscreenStyles();
 
-        // Show fullscreen prompt after a short delay
+        // Check orientation immediately - show rotate overlay if portrait
+        checkOrientation();
+
+        // Show fullscreen prompt after a short delay (only if in landscape)
         setTimeout(() => {
-            showFullscreenPrompt();
+            const isPortrait = window.innerHeight > window.innerWidth;
+            if (!isPortrait) {
+                showFullscreenPrompt();
+            }
         }, 1000);
     }
 
