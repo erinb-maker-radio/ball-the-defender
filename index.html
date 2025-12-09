@@ -1009,26 +1009,8 @@
             AudioEditorBridge.init();
         });
 
-        // Hook into game start - auto-play audio editor
-        const originalStartGame = window.startGame;
-        window.addEventListener('load', () => {
-            // Wait for game.js to define startGame
-            const checkStartGame = setInterval(() => {
-                if (window.startGame && window.startGame !== originalStartGame) {
-                    const gameStartGame = window.startGame;
-                    window.startGame = function(...args) {
-                        const result = gameStartGame.apply(this, args);
-                        // Start audio editor playback when game starts
-                        setTimeout(() => {
-                            console.log('🎵 Starting Audio Editor playback...');
-                            AudioEditorBridge.play();
-                        }, 500);
-                        return result;
-                    };
-                    clearInterval(checkStartGame);
-                }
-            }, 100);
-        });
+        // Audio editor playback is now started from game.js after loading screen is hidden
+        // This ensures music doesn't start during loading
 
         // Hook into game stop
         window.addEventListener('load', () => {

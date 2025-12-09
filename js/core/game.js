@@ -5764,6 +5764,11 @@ async function startGame() {
         window.DrumLayerSystem.start();
         debugLog('🥁 Drum layer system started');
     }
+    // Start audio editor playback
+    if (window.AudioEditorBridge) {
+        window.AudioEditorBridge.play();
+        debugLog('🎵 Audio editor playback started');
+    }
 
     pauseBtn.style.display = 'block';
     pauseBtn.textContent = 'PAUSE';
