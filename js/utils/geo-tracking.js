@@ -49,24 +49,26 @@
     // Get user's location from IP
     async function getLocationFromIP() {
         try {
-            // Using ip-api.com (free, no API key needed)
-            const response = await fetch('http://ip-api.com/json/?fields=status,city,regionName,country,lat,lon');
+            // Using ipapi.co (free HTTPS API, no key needed for low volume)
+            const response = await fetch('https://ipapi.co/json/');
 
             if (response.ok) {
                 const data = await response.json();
 
-                if (data.status === 'success') {
+                if (data.city && !data.error) {
                     const distance = calculateDistance(
-                        data.lat, data.lon,
+                        data.latitude, data.longitude,
                         CHICO_COORDS.lat, CHICO_COORDS.lon
                     );
 
+                    console.log('🌍 Location detected:', data.city, data.country_name);
+
                     return {
                         city: data.city || 'Unknown',
-                        region: data.regionName || '',
-                        country: data.country || 'Unknown',
-                        latitude: data.lat,
-                        longitude: data.lon,
+                        region: data.region || '',
+                        country: data.country_name || 'Unknown',
+                        latitude: data.latitude,
+                        longitude: data.longitude,
                         distance_from_chico: distance
                     };
                 }
